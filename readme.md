@@ -3,6 +3,8 @@ Massive thanks to the makers of hhe following scripts
 -True Auto Stats, Story Arc Engine, Auto Cards, ReputeX, System requests,
 -Simplified time input & Text formatter from dynamic worlds, Epoch time script,
 -narrative guidance overhaul, Random events, Paragragh fix script.
+-added input based time as well
+
 
 Personal changes added
 -epoch is present but for future intergration maybe. for now it just runs normally without affecting other scripts.
@@ -10,4 +12,4 @@ Personal changes added
 for example if you are generating a new arc every 300+ turns, it wasnt robust enough so the old sae of deleting items after a specified number of turns was better.
 ideally, if both logics could run at the same time then it would be better so i returned the original sae
 -added mp and ep heal to regualar skill and talent based healing
--joined both simplified input time and action based time.
+-joined both simplified input time and action based time to work as one so both scripts run and global time changes depending on both
