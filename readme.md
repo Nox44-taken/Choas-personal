@@ -10,3 +10,4 @@ Personal changes added
 for example if you are generating a new arc every 300+ turns, it wasnt robust enough so the old sae of deleting items after a specified number of turns was better.
 ideally, if both logics could run at the same time then it would be better so i returned the original sae
 -added mp and ep heal to regualar skill and talent based healing
+-joined both simplified input time and action based time.
