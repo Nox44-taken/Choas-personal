@@ -80,13 +80,25 @@ This scenario is a freeform demo of the ReputeX system. Let the player's persona
   if (typeof output !== "undefined") output.push("[DEBUG] AutoCards processed.");
 
   // --- Compose Final Output ---
+
+   // --- Clock String ---
+  let clockString = typeof getClockString === "function"
+    ? getClockString()
+    : (globalThis.getClockString ? globalThis.getClockString() : "");
+
+  let timeSummary = "";
+  if (clockString) timeSummary = `It is currently ${clockString}.`;
+  //add the result
+
   // Build final context
   const contextText = [
     instructions,
     `[World Reputation Summary] ${worldSummary}`,
     `[Personal Reputation Summary] ${personalSummary}`,
-    text
-  ].join("\n\n");
+    timeSummary,
+      text,
+      clockString ? `[Clock]: ${clockString}` : ""
+  ].filter(Boolean).join("\n\n")
 
 
 
