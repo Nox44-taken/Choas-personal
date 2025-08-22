@@ -53,7 +53,9 @@ const conflictWords = ["attack", "stab", "destroy", "break", "steal", "ruin", "b
 
 const calmingWords = ["calm", "rest", "relax", "meditate", "sleep", "comfort", "hug", "smile", "forgive", "mend", "repair", "plant", "sing", "dance", "celebrate", "collaborate", "share", "give", "donate", "protect", "shelter", "trust", "hope", "dream", "revive", "eat", "drink", "balance", "cheer", "laugh", "play", "build", "bake", "craft", "cook", "empathize", "apologize", "befriend", "admire", "sympathize", "thank", "appreciate", "cherish", "love", "pet", "respect", "restore", "guide", "teach", "learn", "daydream", "wander", "explore", "discover", "reflect", "happy", "joy", "kind", "heal", "help", "assist"]
 
-  retrieveCurrFromSC();
+ retrieveCurrFromSC() ;
+//map time for stt script
+ retrieveSTTFromSC();
   
 const modifier = (text) => {
 
@@ -87,6 +89,94 @@ const modifier = (text) => {
   text = onInput_TAS(text);
 
 const result = onInput_Combined(text);
+//store time as stt script then retrive mapped to worldclock script
+ storeSTTToSC();
+
+ retrieveWCFromSC();
+ ///run world clock input modifier
+ function getClockString() {
+    const c = state.worldClock;
+    return `Year ${c.year}, ${String(c.month).padStart(2, "0")}-${String(c.day).padStart(2, "0")} ${String(c.hour).padStart(2, "0")}:${String(c.minute).padStart(2, "0")}`;
+  }
+
+  const NUMBER_WORDS = {
+    a: 1, an: 1, one: 1, two: 2, three: 3, four: 4, five: 5,
+    six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+    eleven: 11, twelve: 12, few: 3 // Expand as needed!
+  };
+
+  // --- 1. Natural Language Skip Parser ---
+  let natSkip = text.match(/(a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|few|\d+)\s*(day|days|month|months|year|years)\s+go(?:es)?\s+by/i);
+  if (natSkip) {
+    let amountRaw = natSkip[1].toLowerCase();
+    let amount = NUMBER_WORDS[amountRaw] || parseInt(amountRaw);
+    let unit = natSkip[2].toLowerCase();
+    if (unit.startsWith('day')) {
+      for (let i = 0; i < amount; i++) advanceTime(24 * 60);
+    } else if (unit.startsWith('month')) {
+      for (let i = 0; i < amount; i++) {
+        let days = daysInMonth ? daysInMonth(state.worldClock.year, state.worldClock.month) : 30;
+        for (let d = 0; d < days; d++) advanceTime(24 * 60);
+      }
+    } else if (unit.startsWith('year')) {
+      for (let i = 0; i < amount; i++) {
+        for (let m = 1; m <= 12; m++) {
+          let days = daysInMonth ? daysInMonth(state.worldClock.year, m) : 30;
+          for (let d = 0; d < days; d++) advanceTime(24 * 60);
+        }
+      }
+    }
+    text = text.replace(natSkip[0], '');
+  } else {
+    // --- 2. Classic "skip N X" Parser ---
+    let skipMatch = text.match(/skip\s+(a|an|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|few|\d+)\s*(day|days|month|months|year|years)/i);
+    if (skipMatch) {
+      let amountRaw = skipMatch[1].toLowerCase();
+      let amount = NUMBER_WORDS[amountRaw] || parseInt(amountRaw);
+      let unit = skipMatch[2].toLowerCase();
+      if (unit.startsWith('day')) {
+        for (let i = 0; i < amount; i++) advanceTime(24 * 60);
+      } else if (unit.startsWith('month')) {
+        for (let i = 0; i < amount; i++) {
+          let days = daysInMonth ? daysInMonth(state.worldClock.year, state.worldClock.month) : 30;
+          for (let d = 0; d < days; d++) advanceTime(24 * 60);
+        }
+      } else if (unit.startsWith('year')) {
+        for (let i = 0; i < amount; i++) {
+          for (let m = 1; m <= 12; m++) {
+            let days = daysInMonth ? daysInMonth(state.worldClock.year, m) : 30;
+            for (let d = 0; d < days; d++) advanceTime(24 * 60);
+          }
+        }
+      }
+      text = text.replace(skipMatch[0], '');
+    } else {
+      // --- 3. Action, Dialogue, Narration, or CONTINUE (empty) ---
+      let mins = 0;
+      let actionMatched = false;
+
+      mins = getCompoundActionMinutes(text);
+      if (mins && mins > 0) actionMatched = true;
+
+      // Handles ALL cases, including empty input
+      if (!actionMatched) {
+        if (!text.trim()) {
+          mins = 2; // Continue always advances 2 minutes!
+        } else if (
+          /^["“”']/m.test(text.trim()) ||
+          /\byou (say|ask|reply|respond|murmur|shout|whisper)\b/i.test(text)
+        ) {
+          mins = 3;
+        } else {
+          mins = 2;
+        }
+      }
+      // Always advance if mins > 0
+      advanceTime(mins);
+      state.lastActionMinutes = mins;
+    }
+  }
+
    if (text.toLowerCase().includes("@req")) {
     let requestText = text.replace(/^[\s\S]*@req(?:uest)?\s*/i, "").trim();
 
@@ -343,6 +433,12 @@ if (state.heat == undefined){
     }
   }
   state.authorsNoteStorage = state.memory.authorsNote
+
+// store as worldclock script then retreive as global clock and make changes for output
+storeWCToSC();
+
+retrieveCurrFromSC();
+
  storeCurrToSC();
   // === World Clock Initialization ===
   if (!state.worldClock) state.worldClock = { year: 1454, month: 3, day: 27, hour: 7, minute: 0 };
