@@ -8795,11 +8795,121 @@ const raceMods = {
     spdMod: -10,
     lckMod: -10,
     intlMod: -10
-  }
+  },
+    dogfolk: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    catfolk: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    tigerfolk: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    rabbitfolk: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    wolfkin: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    succubus: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    bearfolk: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    halfling: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    merperson: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
+    lamia: {
+    lvlMod: 0,
+    hpMod: 10,
+    mpMod: -5,
+    epMod: 10,
+    atkMod: 10,
+    defMod: 0,
+    spdMod: 10,
+    lckMod: 0,
+    intlMod: -5
+  },
 };
 
 modKeys = ["lvlMod", "hpMod", "mpMod", "epMod", "atkMod", "defMod", "spdMod", "lckMod", "intlMod"];
-raceNames = ["Human", "Dwarf", "Beastfolk", "Elf", "Orc", "Lizardmen", "Goblin", "Majin", "Vampire", "Fairy", "God", "Yokai", "Dragon", "Zombie", "Insectoid", "Angel", "Demon", "Daemon", "Slime", "Harpy", "Lich", "Bloodletter", "Plaguebearer", "Chiss", "Shifters", "High Elves", "Sangheili", "Kig-Yar", "Unggoy", "Minotaur", "Yautja", "Kroxigor", "Krogan", "Twi'lek", "Erinyes", "Togruta", "Skink", "Cold Ones", "Jiralhanae"];
+raceNames = ["Human", "Dwarf", "Beastfolk", "Elf", "Orc", "Lizardmen", "Goblin", "Majin", "Vampire", "Fairy", "God", "Yokai", "Dragon", "Zombie", "Insectoid", "Angel", "Demon", "Daemon", "Slime", "Harpy", "Lich", "Bloodletter", "Plaguebearer", "Chiss", "Shifters", "High Elves", "Sangheili", "Kig-Yar", "Unggoy", "Minotaur", "Yautja", "Kroxigor", "Krogan", "Twi'lek", "Erinyes", "Togruta", "Skink", "Cold Ones", "Jiralhanae", "dogfolk", "catfolk", "tigerfolk", "wolfkin", "bearfolk", "succubus", "rabbitfolk", "halfling", "lamia", "merperson"  ];
 statKeysForMod = ["lvl", "hp", "mp", "ep", "atk", "def", "spd", "lck", "intl"];
 
 
@@ -9040,10 +9150,10 @@ function storeCurrToSC() {
 
   // Format the heat, temperature, and author’s note info
   currSC.entry =
-     `World Clock:""\n` +
-  `Year: ${state.stt.year}\n` +
-  `Month-Day: ${String(state.stt.month).padStart(2, '0')}-${String(state.stt.dayOfMonth).padStart(2, '0')}\n` +
-  `Hour-Minute: ${String(state.stt.gameHour).padStart(2, '0')}:${String(state.stt.gameMinute).padStart(2, '0')}\n` +
+    `World Clock: ${state.statusBar || ""}\n` + 
+    `Year: ${state.globalTime.year}\n` +
+    `Month-Day: ${String(state.globalTime.month).padStart(2, '0')}-${String(state.globalTime.day).padStart(2, '0')}\n` +
+    `Hour-Minute: ${String(state.globalTime.hour).padStart(2, '0')}:${String(state.globalTime.minute).padStart(2, '0')}\n` +
     `Current Heat: ${state.heat}\n` +
     `Current Temperature: ${state.storyTemperature}\n` +
     `Current turn: ${state.turnNum_SAE}\n` +
@@ -9074,6 +9184,7 @@ function storeCurrToSC() {
 
 
 function retrieveCurrFromSC() {
+  
   // Fetch the "Story Status" card
   const currSC = storyCards.find(sc => sc.title === "Story Status");
   if (!currSC || !currSC.entry) return;
@@ -9085,18 +9196,16 @@ function retrieveCurrFromSC() {
     const [key, ...rest] = line.split(':').map(s => s.trim());
     const value = rest.join(':'); // preserves hour:minute intact
 
-    if (key === "Year") {
-      state.stt.year = Number(value);
-    }
+    if (key === "Year") state.globalTime.year = Number(value);
     else if (key === "Month-Day") {
-      const [month, day] = value.split('-').map(Number);
-      state.stt.month = month;
-      state.stt.dayOfMonth = day;
+    const [month, day] = value.split('-').map(Number);
+    state.globalTime.month = month;
+    state.globalTime.day = day;
     }
     else if (key === "Hour-Minute") {
-      const [hour, minute] = value.split(':').map(Number);
-      state.stt.gameHour = hour;
-      state.stt.gameMinute = minute;
+    const [hour, minute] = value.split(':').map(Number);
+    state.globalTime.hour = hour;
+    state.globalTime.minute = minute;
     }
     else if (key === "Current Heat") {
       state.heat = Number(value);
@@ -9120,8 +9229,6 @@ function retrieveCurrFromSC() {
       state.stt.timePassOnContinue = Number(value);
     }
   });
-
-
   // --- Apply JSON/date recalculation logic exactly as given ---
   let needsDateRecalc = false;
 
@@ -12766,6 +12873,7 @@ function getMonType() {
 }
 const montype = [
   "lizard",
+  "dravune",
   "spider",
   "slime",
   "gremlin",
@@ -14370,7 +14478,7 @@ const Epoch = (() => {
 
     // --- HELPER FUNCTION FOR IN-BODY SYSTEM MESSAGES ---
     function formatSystemMessage(messageContent) {
-        return `\n\n[🔹🔹🔹🔹🔹]\n${messageContent.trim()}\n[🔹🔹🔹🔹🔹]\n\n`;
+        return `\n\n🔹🔹🔹🔹🔹\n${messageContent.trim()}\n🔹🔹🔹🔹🔹\n\n`;
     }
 
     // --- TEXT SIMILARITY SCORE FUNCTION ---
@@ -14534,7 +14642,7 @@ const Epoch = (() => {
             }
             state.currentActionTypeForTimeAdvance = 'continue'; 
         },
-        appendTimestampsToText: function(txtToMod){if(!state.stt||!state.stt.isEnabled||typeof txtToMod!=='string')return txtToMod;const turn=(typeof info!=='undefined'&&Number.isFinite(info.actionCount))?info.actionCount:0;let tsStr="";const isSysOut=/\[🔹🔹🔹🔹🔹\]|\[SYSTEM:.*\]|>>>|<<<|{>/.test(txtToMod.trim());if(state.stt.showDateTimestamp&&turn>0&&turn%state.stt.dateTimestampFrequency===0){tsStr+=` [📅 Date: ${this.getFormattedTime(false)}]`;}if(state.stt.showTimeTimestamp&&turn>0&&turn%state.stt.timeTimestampFrequency===0){tsStr+=` [⏰ Time: ${String(state.stt.gameHour||0).padStart(2,'0')}:${String(state.stt.gameMinute||0).padStart(2,'0')} (${this.getDayNightStatus()})]`;}if(tsStr){if(state.stt.useToastForTimestamps&&!isSysOut){if(!state.toastQueue)state.toastQueue=[];state.toastQueue.push(tsStr.trim());return txtToMod;}else if(!isSysOut){return`${txtToMod.trim()}\n${tsStr.trim()}`;}}return txtToMod;},
+        appendTimestampsToText: function(txtToMod){if(!state.stt||!state.stt.isEnabled||typeof txtToMod!=='string')return txtToMod;const turn=(typeof info!=='undefined'&&Number.isFinite(info.actionCount))?info.actionCount:0;let tsStr="";const isSysOut=/🔹🔹🔹🔹🔹|\[SYSTEM:.*\]|>>>|<<<|{>/.test(txtToMod.trim());if(state.stt.showDateTimestamp&&turn>0&&turn%state.stt.dateTimestampFrequency===0){tsStr+=` [📅 Date: ${this.getFormattedTime(false)}]`;}if(state.stt.showTimeTimestamp&&turn>0&&turn%state.stt.timeTimestampFrequency===0){tsStr+=` [⏰ Time: ${String(state.stt.gameHour||0).padStart(2,'0')}:${String(state.stt.gameMinute||0).padStart(2,'0')} (${this.getDayNightStatus()})]`;}if(tsStr){if(state.stt.useToastForTimestamps&&!isSysOut){if(!state.toastQueue)state.toastQueue=[];state.toastQueue.push(tsStr.trim());return txtToMod;}else if(!isSysOut){return`${txtToMod.trim()}\n${tsStr.trim()}`;}}return txtToMod;},
         handleContext: function(text) {
             if(!state.stt || !state.stt.isEnabled || typeof text!=='string') return text;
             let p = "";
@@ -14604,7 +14712,7 @@ globalThis.onInput_Combined = function(text) {
     let isSystemMessageToIgnore = false;
 
     const systemMessagePatterns = [
-        /\[🔹🔹🔹🔹🔹\]\s*🎭\s*Arc Tone set to:/i,    
+        /🔹🔹🔹🔹🔹\s*🎭\s*Arc Tone set to:/i,    
         /🧠\s*Brainstorming new story arc/i,              
         />>>\s*please select "continue"/i                 
     ];
@@ -14729,7 +14837,7 @@ globalThis.onContext_Combined = function(text, stop) {
     let currentText = text;
     let currentStop = stop;
 
-    const sysRgx = /\n*\s*\[🔹🔹🔹🔹🔹\]\n?([\s\S]*?)\n?\[🔹🔹🔹🔹🔹\]\s*\n*/g;
+    const sysRgx = /\n*\s*🔹🔹🔹🔹🔹\n?([\s\S]*?)\n?🔹🔹🔹🔹🔹\s*\n*/g;
     currentText = (currentText || "").replace(sysRgx, (m, c) => `\n\n${c.trim()}\n\n`).replace(/\n{3,}/g, '\n\n').trim();
 
     if (STT.handleContext) currentText = STT.handleContext(currentText);
@@ -14760,7 +14868,7 @@ globalThis.onOutput_Combined = function(text) {
     if(STT.advanceTimeBasedOnAction) STT.advanceTimeBasedOnAction();
 
     let aiNarrativeOutput = text; let systemMessages = []; 
-    const isInputFromOurSystem = /\[🔹🔹🔹🔹🔹\][\s\S]*?\[🔹🔹🔹🔹🔹\]/.test((text||"").trim());
+    const isInputFromOurSystem = /🔹🔹🔹🔹🔹[\s\S]*?🔹🔹🔹🔹🔹/.test((text||"").trim());
     const isACGActive = (state.AutoCards?.generation?.workpiece && Object.keys(state.AutoCards.generation.workpiece).length > 0);
 
     const currentTurnForOutputLog = typeof info !== 'undefined' && info.actionCount !== undefined ? info.actionCount : 'N/A';
@@ -14772,7 +14880,7 @@ globalThis.onOutput_Combined = function(text) {
         if (typeof AutoCards === 'function') {
             let acOutput = AutoCards("output", aiNarrativeOutput);
             if (typeof acOutput === 'string' && acOutput.trim()) {
-                if (/\[🔹🔹🔹🔹🔹\]|>>>|<<<|{>/.test(acOutput.trim())) { systemMessages.push(acOutput); aiNarrativeOutput = ""; }
+                if (/🔹🔹🔹🔹🔹|>>>|<<<|{>/.test(acOutput.trim())) { systemMessages.push(acOutput); aiNarrativeOutput = ""; }
                 else { aiNarrativeOutput = acOutput; }
             } else { aiNarrativeOutput = ""; }
         }
@@ -14788,7 +14896,7 @@ globalThis.onOutput_Combined = function(text) {
     let outputParts = [];
     if (typeof aiNarrativeOutput === 'string' && aiNarrativeOutput.trim()) { outputParts.push(aiNarrativeOutput); }
     outputParts.push(...systemMessages.filter(p => typeof p === 'string' && p.trim()));
-    let combinedOutput = outputParts.map(p => { const sr = /\n*\s*\[🔹🔹🔹🔹🔹\]\n?([\s\S]*?)\n?\[🔹🔹🔹🔹🔹\]\s*\n*/g; return p.replace(sr, (m, c) => c.trim()); }).filter(p => p && p.trim() !== "").join("\n\n");
+    let combinedOutput = outputParts.map(p => { const sr = /\n*\s*🔹🔹🔹🔹🔹\n?([\s\S]*?)\n?🔹🔹🔹🔹🔹\s*\n*/g; return p.replace(sr, (m, c) => c.trim()); }).filter(p => p && p.trim() !== "").join("\n\n");
     combinedOutput = combinedOutput.replace(/\n{3,}/g, '\n\n').trim();
 
     if (STT.appendTimestampsToText) { combinedOutput = STT.appendTimestampsToText(combinedOutput); }
@@ -15092,4 +15200,528 @@ function ParagraphFix(hook, inputText) {
             state.ParagraphFix = PF;
             return inputText;
     }
+}
+//// added input time script
+
+if (!state.globalTime) {
+  state.globalTime = { year: 1454, month: 3, day: 27, hour: 7, minute: 0 };
+}
+
+if (!state.worldClock) {
+  // Customize starting year/month/day/hour/minute
+ state.worldClock = state.globalTime;
+ // <==Don't forget to Set your clock
+}
+if (!state.pendingMinutes) state.pendingMinutes = 0;
+
+const MONTH_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+// Helper: Is Leap Year?
+function isLeapYear(year) {
+  return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+}
+
+// Helper: Days in Month
+function daysInMonth(year, month) {
+  if (month === 2 && isLeapYear(year)) return 29;
+  return MONTH_DAYS[month-1];
+}
+
+// Advance time by X minutes, handling all rollovers
+function advanceTime(minutes) {
+  state.pendingMinutes += minutes;
+  let wc = state.worldClock;
+
+  wc.minute += state.pendingMinutes;
+  state.pendingMinutes = 0;
+
+  while (wc.minute >= 60) {
+    wc.minute -= 60;
+    wc.hour += 1;
+  }
+  while (wc.hour >= 24) {
+    wc.hour -= 24;
+    wc.day += 1;
+    // Optional: Trigger onNewDay() here!
+    if (typeof onNewDay === "function") onNewDay();
+  }
+  // Day/month/year rollover
+  while (wc.day > daysInMonth(wc.year, wc.month)) {
+    wc.day -= daysInMonth(wc.year, wc.month);
+    wc.month += 1;
+    // Optional: Trigger onNewMonth() here!
+    if (typeof onNewMonth === "function") onNewMonth();
+  }
+  while (wc.month > 12) {
+    wc.month -= 12;
+    wc.year += 1;
+    // Optional: Trigger onNewYear() here!
+    if (typeof onNewYear === "function") onNewYear();
+  }
+}
+
+// Usage: advanceTime(actionMinutes.eat);
+
+// === Status Bar Helper ===
+function getClockString() {
+  const wc = state.worldClock;
+  // e.g. "Year 1234, 04-23 15:02"
+  return `Year ${wc.year}, ${String(wc.month).padStart(2,"0")}-${String(wc.day).padStart(2,"0")} ${String(wc.hour).padStart(2,"0")}:${String(wc.minute).padStart(2,"0")}`;
+}
+
+// === Milestone/Event Hooks ===
+// Example birthday system, etc
+if (!state.birthdays) state.birthdays = {
+  player:     { month: 3, day: 27 },   // <==Change as needed.
+  mother:     { month: 8, day: 14 },
+  father:     { month: 5, day: 9 },
+  sibling:    { month: 2, day: 12 },
+  grandma:    { month: 1, day: 7 },
+  grandpa:    { month: 11, day: 22 },
+  aunt:       { month: 6, day: 16 },
+  uncle:      { month: 10, day: 3 },
+  cousin:     { month: 9, day: 4 },
+  // Add more as needed!
+};
+
+if (!state.ages) state.ages = {
+  player:   5,    // <==Change as needed.
+  mother:   34,
+  father:   36,
+  sibling:   7,
+  grandma:  60,
+  grandpa:  62,
+  aunt:     32,
+  uncle:    38,
+  cousin:   12,
+  // Add more as needed!
+};
+
+
+// Called on each new day, checks birthdays and advances ages
+function onNewDay() {
+  let wc = state.worldClock;
+  for (const who in state.birthdays) {
+    let bd = state.birthdays[who];
+    if (wc.month === bd.month && wc.day === bd.day) {
+      state.ages[who] = (state.ages[who] || 0) + 1;
+      if (typeof output !== "undefined") output.push(`🎉 It's ${who}'s birthday! They are now ${state.ages[who]}.`);
+    }
+  }
+  // You can hook in other daily/milestone events here!
+}
+// Recurring monthly events (cycling or random)
+const MONTHLY_EVENTS = [
+  "The city hosts the Lantern Festival.",   // <==Change as needed. Remember to make them fit Your Scenarios.
+  "A new merchant guild caravan arrives.",
+  "The rivers swell with spring rains.",
+  "The Harvest Market draws crowds from afar.",
+  "Rumors swirl of a masked thief prowling the night.",
+  "The local lord calls a council in the square.",
+  "A playwright debuts a scandalous new play.",
+  "Children compete in the annual kite-flying contest.",
+  "The temple holds a day of silent meditation.",
+  "A rare flower blooms in the palace gardens.",
+  "Street performers fill the market with music and dance.",
+  "Local artists unveil murals in the city center.",
+  "The Blacksmiths’ Guild forges a legendary blade (or so they claim).",
+  "A rain of shooting stars is seen overhead.",
+];
+
+const YEARLY_EVENTS = [
+  "Fireworks and bells ring in the new year.",   // <==Change as needed. Remember to make them fit Your Scenarios.
+  "Tax collectors begin their rounds.",
+  "The royal astrologer reads omens in the square.",
+  "A grand tournament is announced.",
+  "Peasants march for fairer grain prices.",
+  "A rare comet blazes across the sky.",
+  "The river floods, blessing the fields.",
+  "The king’s health is rumored to be failing.",
+  "The Academy opens applications for young apprentices.",
+  "A ship brings spices and news from distant lands.",
+  "A magical fog shrouds the city for three days.",
+  "A famous bard composes a song about your deeds.",
+];
+
+
+// One-time events
+const SPECIAL_EVENTS = [
+  {
+    key: "mysteriousVisitor",   // <==Change as needed. Remember to make them fit Your Scenarios.
+    month: 5,
+    year: 1455,
+    text: "A mysterious visitor from the east arrives, bringing tales and strange gifts.",
+  },
+  {
+    key: "plagueRumors",
+    month: 10,
+    year: 1456,
+    text: "Whispers of a spreading plague send fear through the city.",
+  },
+  {
+    key: "royalWedding",
+    month: 2,
+    year: 1457,
+    text: "The city erupts in celebration for the royal wedding.",
+  },
+  {
+    key: "firstMagicStorm",
+    month: 8,
+    year: 1455,
+    text: "A wild magic storm lashes the city, enchanting random objects and animals for a day.",
+  },
+  {
+    key: "libraryFire",
+    month: 12,
+    year: 1456,
+    text: "A fire breaks out in the Grand Library. Scholars race to save ancient tomes.",
+     
+  },
+  {
+    key: "secretFestival",
+    month: 9,
+    year: 1455,
+    text: "A secret, invite-only festival draws the city's elite into the moonlit gardens.",
+    onceOnly: true // Example, in case you want some events absolutely one-time
+  },
+];
+
+
+// You can use onNewMonth and onNewYear for bigger events/seasons if you want:
+function onNewMonth() {
+  let wc = state.worldClock;
+  if (!state.firedEvents) state.firedEvents = {};
+
+  // 1. One-time special events (fire if not already fired and matches date)
+  for (const event of SPECIAL_EVENTS) {
+    if (
+      !state.firedEvents[event.key] &&
+      wc.year === event.year &&
+      wc.month === event.month
+    ) {
+      state.firedEvents[event.key] = true;
+      if (typeof output !== "undefined") output.push(`🌟 ${event.text}`);
+    }
+  }
+
+  // 2. Recurring event (pick by month or random)
+  let eventLine = MONTHLY_EVENTS[(wc.month - 1) % MONTHLY_EVENTS.length];
+  if (typeof output !== "undefined") output.push(`📅 ${eventLine}`);
+}
+
+
+function onNewYear() {
+  let wc = state.worldClock;
+  if (!state.firedEvents) state.firedEvents = {};
+
+  // 1. One-time yearly special events if you want (repeat the above logic with year+month = 1 if needed)
+
+  // 2. Recurring event (cycle by year, or pick random)
+  let eventLine = YEARLY_EVENTS[(wc.year - 1454) % YEARLY_EVENTS.length];
+  if (typeof output !== "undefined") output.push(`🎇 ${eventLine}`);
+  if (wc.year === 1458 && !state.firedEvents["mysteriousComet"]) {
+    state.firedEvents["mysteriousComet"] = true;
+    if (typeof output !== "undefined") output.push("☄️ A blazing comet appears, and the city's fate is said to hang in the balance.");
+  }
+}
+
+
+function timeSkip({days = 0, months = 0, years = 0} = {}) {
+  if (!state.worldClock) state.worldClock = { year: 1454, month: 3, day: 27, hour: 7, minute: 0 };
+  let clock = state.worldClock;
+
+  // Calculate total days to skip (including months/years)
+  let totalDays = days;
+
+  // Add days for each year skipped
+  for (let y = 0; y < years; y++) {
+    let yVal = clock.year + y;
+    for (let m = 1; m <= 12; m++) {
+      totalDays += daysInMonth(yVal, m);
+    }
+  }
+
+  // Add days for each month skipped
+  for (let m = 0; m < months; m++) {
+    let mYear = clock.year + Math.floor((clock.month + m - 1) / 12);
+    let mNum = ((clock.month + m - 1) % 12) + 1;
+    totalDays += daysInMonth(mYear, mNum);
+  }
+
+  // Advance day by day so daily events trigger
+  for (let i = 0; i < totalDays; i++) {
+    clock.day++;
+    if (clock.day > daysInMonth(clock.year, clock.month)) {
+      clock.day = 1;
+      clock.month++;
+      if (clock.month > 12) {
+        clock.month = 1;
+        clock.year++;
+      }
+    }
+    if (typeof onNewDay === "function") onNewDay();
+  }
+
+  // Optionally, reset hour/minute (uncomment if you want this)
+  // clock.hour = 7; clock.minute = 0;
+
+  if (typeof output !== "undefined") {
+    let parts = [];
+    if (years) parts.push(`${years} year${years > 1 ? "s" : ""}`);
+    if (months) parts.push(`${months} month${months > 1 ? "s" : ""}`);
+    if (days) parts.push(`${days} day${days > 1 ? "s" : ""}`);
+    output.push(`⏩ You skip ahead ${parts.join(", ")}. It is now ${getClockString()}.`);
+  }
+}
+   function getCompoundActionMinutes(text) {
+  let minutes = 0;
+  let matches = new Set();
+
+  // Your full actionMinutes and actionRegexList should be defined above!
+  for (const [regex, key] of actionRegexList) {
+    if (regex.test(text)) {
+      if (!matches.has(key)) { // Prevent double-counting if two regexes point to the same action
+        minutes += actionMinutes[key] || 0;
+        matches.add(key);
+      }
+    }
+  }
+  // Fallback: If nothing matched, it's a minor action
+  if (minutes === 0) return actionMinutes.minor || 1;
+  return minutes;
+}
+
+const actionMinutes = {
+  eat: 10, drink: 3, cook: 20, clean: 15, bathe: 15, wash: 10, dress: 5, sleep: 480, nap: 60, groom: 7, brush: 5,
+  chat: 15, talk: 10, argue: 12, comfort: 8, teach: 25, scold: 6, debate: 20, joke: 5, lecture: 30, confess: 8,
+  feed: 7, soothe: 7, cuddle: 6, hug: 3, kiss: 2, play: 15, babysit: 30, care: 18, rock: 5, tuck: 5, discipline: 7,
+  cry: 3, laugh: 2, sulk: 8, reminisce: 10, daydream: 7, meditate: 12, worry: 5,
+  walk: 10, run: 4, jog: 6, hike: 18, ride: 15, sail: 30, row: 18, climb: 9, sneak: 6, swim: 12, fly: 25, explore: 18,
+  study: 30, work: 60, write: 20, read: 15, paint: 30, sculpt: 40, invent: 50, build: 45, repair: 20, sew: 15, shop: 30, train: 35, plant: 20, harvest: 22, mine: 45, smith: 50, brew: 18, enchant: 25, experiment: 30,
+  sing: 8, dance: 12, game: 15, listenmusic: 8, perform: 25, watch: 10, fish: 30, picnic: 40, gamble: 20, drinkalcohol: 30,
+  fight: 8, battle: 10, spar: 12, duel: 12, hunt: 35, escape: 7, steal: 5, spy: 15, patrol: 25,
+  cast: 12, ritual: 30, summon: 18, heal: 8, bless: 5, curse: 7, scry: 10, brewpotion: 15, commune: 12,
+  minor: 1
+};
+
+const actionRegexList = [
+  // [regex, key in actionMinutes]   // <==Currently being tested
+  [/\bsleep\b/, 'sleep'],
+  [/\bnap\b|\brest\b/, 'nap'],
+  [/\beat\b|\bbreakfast|\blunch\b|\bdinner\b|\bmeal\b|\bsnack/, 'eat'],
+  [/\b(drink(?!\s*(ale|beer|wine|liquor)))|\bsip\b|\bbeverage\b|\bwater\b|\btea\b|\bcoffee\b/, 'drink'],
+  [/\bdrink (ale|beer|wine|liquor)\b/, 'drinkalcohol'],
+  [/\bcook\b|\bbake\b|\bprepare food\b/, 'cook'],
+  [/\bclean\b|\btidy\b|\bsweep\b|\bscrub\b|\bmop\b/, 'clean'],
+  [/\bbathe\b|\bbath\b|\bwash\b|\bshower\b|\brinse\b/, 'bathe'],
+  [/\bdress\b|\bclothe\b|\bchange clothes\b|\bput on\b/, 'dress'],
+  [/\bgroom\b|\bcomb\b|\bbrush hair\b|\bstyle\b/, 'groom'],
+  [/\bbrush (teeth|hair)\b/, 'brush'],
+  
+    // Conversation
+  [/\bchat\b|\btalk\b|\bconverse\b|\bspeak\b|\bconversation\b|\bgossip\b/, 'chat'],
+  [/\bargue\b|\bdebate\b|\bfight verbally\b|\bconfront\b/, 'argue'],
+  [/\bcomfort\b|\breassure\b|\bconsole\b/, 'comfort'],
+  [/\bteach\b|\bexplain\b|\binstruct\b|\btutor\b/, 'teach'],
+  [/\bscold\b|\bdiscipline\b|\bchide\b/, 'scold'],
+  [/\bjoke\b|\bjest\b|\bbanter\b|\bquip(s)?\b/, 'joke'],
+  [/\blecture\b|\blong talk\b/, 'lecture'],
+  [/\bconfess\b|\badmit\b|\breveal secret\b/, 'confess'],
+
+  // Family & care
+  [/\bfeed\b|\bfeeding\b/, 'feed'],
+  [/\bsoothe\b|\bcalm\b|\bsettle\b/, 'soothe'],
+  [/\bcuddle\b|\bhug\b|\bembrace\b/, 'cuddle'],
+  [/\bkiss\b|\bpeck\b|\bsmooch\b/, 'kiss'],
+  [/\bplay\b|\bgames?\b|\bfrolic\b|\broughhouse\b|\btag\b/, 'play'],
+  [/\bbabysit\b|\bwatch children\b/, 'babysit'],
+  [/\bcare\b|\bnurse\b|\battend\b/, 'care'],
+  [/\brock (the|a) baby\b|\bcradle\b/, 'rock'],
+  [/\btuck( in)?\b/, 'tuck'],
+
+  // Emotional
+  [/\bcry\b|\bweep\b|\bsob\b/, 'cry'],
+  [/\blaugh\b|\bgiggle\b|\bchuckle\b/, 'laugh'],
+  [/\bsulk\b|\bmope\b|\bbrood\b/, 'sulk'],
+  [/\breminisce\b|\bremember\b|\breflect\b/, 'reminisce'],
+  [/\bdaydream\b|\bimagine\b/, 'daydream'],
+  [/\bmeditate\b|\bfocus\b|\bbreathe\b/, 'meditate'],
+  [/\bworry\b|\banxious\b|\bfret\b/, 'worry'],
+
+  // Travel & movement
+  [/\bwalk\b|\bstroll\b|\bwander\b|\bamble\b/, 'walk'],
+  [/\brun\b|\bdash\b|\bsprint\b/, 'run'],
+  [/\bjog\b/, 'jog'],
+  [/\bhike\b/, 'hike'],
+  [/\bride\b|\bmount\b|\bhorseback\b/, 'ride'],
+  [/\bsail\b|\brow\b|\bcanoe\b|\bboat\b/, 'sail'],
+  [/\bclimb\b|\bscale\b/, 'climb'],
+  [/\bsneak\b|\btiptoe\b|\bcreep\b/, 'sneak'],
+  [/\bswim\b|\bdive\b/, 'swim'],
+  [/\bfly\b|\bglide\b|\bsoar\b/, 'fly'],
+  [/\bexplore\b|\bscout\b|\binvestigate\b/, 'explore'],
+
+  // Work & crafting
+  [/\bstudy\b|\bread\b|\blearn\b|\bresearch\b/, 'study'],
+  [/\bwork\b|\blabor\b|\btoil\b|\bjob\b|\btask\b/, 'work'],
+  [/\bwrite\b|\bscribble\b|\bcompose\b/, 'write'],
+  [/\bpaint\b|\bdraw\b|\bsketch\b/, 'paint'],
+  [/\bsculpt\b|\bcarve\b|\bmold\b/, 'sculpt'],
+  [/\binvent\b|\btinker\b|\bengineer\b/, 'invent'],
+  [/\bbuild\b|\bconstruct\b/, 'build'],
+  [/\brepair\b|\bfix\b|\bmend\b/, 'repair'],
+  [/\bsew\b|\bstitch\b|\bknit\b/, 'sew'],
+  [/\bshop\b|\bmarket\b|\bbuy\b|\bsell\b/, 'shop'],
+  [/\btrain\b|\bpractice\b|\bdrill\b/, 'train'],
+  [/\bplant\b|\bgarden\b/, 'plant'],
+  [/\bharvest\b|\breap\b/, 'harvest'],
+  [/\bmine\b|\bdig\b|\bquarry\b/, 'mine'],
+  [/\bsmith\b|\bforge\b/, 'smith'],
+  [/\bbrew\b|\bdistill\b/, 'brew'],
+  [/\benchant\b|\bimbue\b/, 'enchant'],
+  [/\bexperiment\b|\btest\b/, 'experiment'],
+
+  // Leisure & fun
+  [/\bsing\b|\bhum\b|\bchant\b/, 'sing'],
+  [/\bdance\b|\bwaltz\b|\btwirl\b/, 'dance'],
+  [/\bgame\b|\bplay\b|\bboard game\b/, 'game'],
+  [/\blisten to music\b|\bmusic\b|\bmelody\b/, 'listenmusic'],
+  [/\bperform\b|\bshow\b|\brecital\b/, 'perform'],
+  [/\bwatch\b|\bobserve\b/, 'watch'],
+  [/\bfish\b|\bfishing\b/, 'fish'],
+  [/\bpicnic\b/, 'picnic'],
+  [/\bgamble\b|\bbet\b|\bwager\b/, 'gamble'],
+
+  // Combat & risk
+  [/\bfight\b|\bbrawl\b|\bscuffle\b/, 'fight'],
+  [/\bbattle\b|\bwar\b/, 'battle'],
+  [/\bspar\b|\bpractice fight\b/, 'spar'],
+  [/\bduel\b|\bchallenge\b/, 'duel'],
+  [/\bhunt\b|\btrack\b/, 'hunt'],
+  [/\bescape\b|\bflee\b|\brun away\b/, 'escape'],
+  [/\bsteal\b|\bpickpocket\b|\blift\b/, 'steal'],
+  [/\bspy\b|\beavesdrop\b/, 'spy'],
+  [/\bpatrol\b/, 'patrol'],
+
+  // Magic & fantasy
+  [/\bcast\b|\bspell\b|\bincant\b|\bmagic\b/, 'cast'],
+  [/\britual\b|\bceremony\b/, 'ritual'],
+  [/\bsummon\b|\bconjure\b/, 'summon'],
+  [/\bheal\b|\bcure\b/, 'heal'],
+  [/\bbless\b/, 'bless'],
+  [/\bcurse\b/, 'curse'],
+  [/\bscry\b|\bdivine\b|\bsee future\b/, 'scry'],
+  [/\bbrew (potion|elixir)\b/, 'brewpotion'],
+  [/\bcommune\b|\bspirit\b|\bghost\b|\bancestor\b/, 'commune'],
+];
+//added mapping logic
+function retrieveSTTFromSC() {
+    const currSC = storyCards.find(sc => sc.title === "Story Status");
+    if (!currSC || !currSC.entry) return;
+
+    const lines = currSC.entry.split('\n');
+
+    lines.forEach(line => {
+        const [key, ...rest] = line.split(':').map(s => s.trim());
+        const value = rest.join(':'); 
+
+        if (key === "Year") state.stt.year = Number(value);
+        else if (key === "Month-Day") {
+            const [month, day] = value.split('-').map(Number);
+            state.stt.month = month - 1;  // STT month is 0–11
+            state.stt.dayOfMonth = day;
+        }
+        else if (key === "Hour-Minute") {
+            const [hour, minute] = value.split(':').map(Number);
+            state.stt.gameHour = hour;
+            state.stt.gameMinute = minute;
+        }
+        else if (key === "TD") state.stt.timePassOnDo = Number(value);
+        else if (key === "TS") state.stt.timePassOnSay = Number(value);
+        else if (key === "TST") state.stt.timePassOnStory = Number(value);
+        else if (key === "TC") state.stt.timePassOnContinue = Number(value);
+    });
+  // --- Apply JSON/date recalculation logic exactly as given ---
+  let needsDateRecalc = false;
+
+  for (const key in this.defaultSettings) {
+    if (state.stt[key] === undefined) {
+      state.stt[key] = JSON.parse(JSON.stringify(this.defaultSettings[key]));
+      if (['gameHour', 'gameMinute', 'dayOfMonth', 'month', 'year'].includes(key)) {
+        needsDateRecalc = true;
+      }
+    }
+  }
+  state.stt.initialized = true;
+
+  try {
+    const currentDate = new Date(
+      state.stt.year, state.stt.month, state.stt.dayOfMonth,
+      state.stt.gameHour, state.stt.gameMinute
+    );
+    if (isNaN(currentDate.getTime())) {
+      console.warn("STT.initialize: Invalid date in state. Resetting.");
+      state.stt = JSON.parse(JSON.stringify(this.defaultSettings));
+      const validDefaultDate = new Date(state.stt.year, state.stt.month, state.stt.dayOfMonth);
+      state.stt.dayOfWeek = validDefaultDate.getDay();
+    } else if (needsDateRecalc || state.stt.dayOfWeek !== currentDate.getDay()) {
+      state.stt.dayOfWeek = currentDate.getDay();
+    }
+  } catch (e) {
+    console.error("STT.initialize: Date validation error. Resetting.", e);
+    state.stt = JSON.parse(JSON.stringify(this.defaultSettings));
+    const validDefaultDate = new Date(state.stt.year, state.stt.month, state.stt.dayOfMonth);
+    state.stt.dayOfWeek = validDefaultDate.getDay();
+  }
+}
+function storeSTTToSC() {
+    const currSC = storyCards.find(sc => sc.title === "Story Status");
+    if (!currSC) return;
+
+    currSC.entry =
+        `World Clock:""\n` +
+        `Year: ${state.stt.year}\n` +
+        `Month-Day: ${String(state.stt.month + 1).padStart(2, '0')}-${String(state.stt.dayOfMonth).padStart(2, '0')}\n` +
+        `Hour-Minute: ${String(state.stt.gameHour).padStart(2, '0')}:${String(state.stt.gameMinute).padStart(2, '0')}\n` + 
+            `TD: ${state.stt.timePassOnDo}\n`+
+    `TS: ${state.stt.timePassOnSay}\n`+
+    `TST: ${state.stt.timePassOnStory}\n`+
+    `TC: ${state.stt.timePassOnContinue} \n`;
+}
+function retrieveWCFromSC() {
+    const currSC = storyCards.find(sc => sc.title === "Story Status");
+    if (!currSC || !currSC.entry) return;
+
+    const lines = currSC.entry.split('\n');
+
+    lines.forEach(line => {
+        const [key, ...rest] = line.split(':').map(s => s.trim());
+        const value = rest.join(':'); 
+
+        if (key === "Year") state.worldClock.year = Number(value);
+        else if (key === "Month-Day") {
+            const [month, day] = value.split('-').map(Number);
+            state.worldClock.month = month;  // STT month is 0–11
+            state.worldClock.day = day;
+        }
+        else if (key === "Hour-Minute") {
+            const [hour, minute] = value.split(':').map(Number);
+            state.worldClock.hour = hour;
+            state.worldClock.minute = minute;
+        }
+    });
+}
+function storeWCToSC() {
+    const currSC = storyCards.find(sc => sc.title === "Story Status");
+    if (!currSC) return;
+
+    currSC.entry =
+        `World Clock:""\n` +
+        `Year: ${state.worldClock.year}\n` +
+        `Month-Day: ${String(state.worldClock.month).padStart(2, '0')}-${String(state.worldClock.day).padStart(2, '0')}\n` +
+        `Hour-Minute: ${String(state.worldClock.hour).padStart(2, '0')}:${String(state.worldClock.minute).padStart(2, '0')}\n` +
+            `TD: ${state.stt.timePassOnDo}\n`+
+    `TS: ${state.stt.timePassOnSay}\n`+
+    `TST: ${state.stt.timePassOnStory}\n`+
+    `TC: ${state.stt.timePassOnContinue} \n`;
 }
