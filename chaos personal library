@@ -4702,41 +4702,16 @@ function AutoCards(inHook, inText, inStop) {
             defaultCardType: check(DEFAULT_CARD_TYPE, "class", "string")
         });
     }
-function getDefaultConfigBans() {
-    let baseList;
-
-    if (typeof DEFAULT_BANNED_TITLES_LIST === "string") {
-        baseList = DEFAULT_BANNED_TITLES_LIST.split(",").map(t => t.trim());
-    } else {
-        baseList = [
-            "North", "East", "South", "West",
-            "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-            "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
-            "Story Arc Settings", "Story Arc", "Updating Story Arc Next Turn",
-            "Charmer", "Honorable", "Rogue", "Dominant", "Submissive", "Prankster", "Curious",
-            "Innocent", "Mischievous", "Affectionate", "Defiant", "Brave", "Clever", "Playful"
-        ];
-    }
-
-    // 🔹 Extract single-word titles for combo generation
-    const singleWords = baseList.filter(t => !t.includes(" "));
-
-    // 🔹 Generate only forward space-separated combos
-    const combos = [];
-    for (let i = 0; i < singleWords.length; i++) {
-        for (let j = 0; j < singleWords.length; j++) {
-            if (i !== j) {
-                combos.push(singleWords[i] + " " + singleWords[j]);
-            }
+    function getDefaultConfigBans() {
+        if (typeof DEFAULT_BANNED_TITLES_LIST === "string") {
+            return uniqueTitlesArray(DEFAULT_BANNED_TITLES_LIST.split(","));
+        } else {
+            return [
+                "North", "East", "South", "West", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+                  "Story Arc Settings", "Story Arc", "Current Story Arc", "Charmer", "Honorable", "Rogue", "Dominant", "Submissive", "Prankster", "Curious", "Innocent", "Mischievous", "Affectionate", "Defiant", "Brave", "Clever", "Playful", "Nox", "Set Story Arc Type", "Not", "Invalid", "Type",  "Month", "Year", "Day", "Minute"
+            ];
         }
     }
-
-    // 🔹 Merge base list + combos and normalize all (trim, collapse spaces, lowercase)
-    const allTitles = [...baseList, ...combos].map(t => t.trim().replace(/\s+/g, " ").toLowerCase());
-
-    // 🔹 Deduplicate and return
-    return uniqueTitlesArray(allTitles);
-}
 
     function uniqueTitlesArray(titles) {
         const existingTitles = new Set();
