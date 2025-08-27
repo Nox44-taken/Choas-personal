@@ -1,12 +1,12 @@
 // Your "Context" tab should look like this
 const modifier = (text) => {
   // First process AutoCards
-  text = onContext_SAE(text); 
+
   text = onContext_TAS(text);
-   text = ParagraphFix("context", text);
+  
   const result = onContext_Combined(text, stop);
 
-
+ text = ParagraphFix("context", text);
 
   // Initialize reputation systems
   // Initialize reputation systems
