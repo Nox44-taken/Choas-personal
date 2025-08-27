@@ -85,7 +85,7 @@ const modifier = (text) => {
   
 
   // First process AutoCards if needed
-   text = onInput_SAE(text); 
+ 
   text = onInput_TAS(text);
 
 const result = onInput_Combined(text);
