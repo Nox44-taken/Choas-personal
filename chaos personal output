@@ -171,14 +171,18 @@ const modifier = (text) => {
   const card = Epoch.initializeTimeState();
     text = Epoch.advanceTurn(text, state, card); 
     
-  text = onOutput_SAE(text);   
+   
   text = onOutput_TAS(text);
-  text = ParagraphFix("output", text);
+  
 
   const result = onOutput_Combined(text);
 
+text = ParagraphFix("output", text);
 //store time as stt script then retrive mapped to worldclock script
  storeSTTToSC();
+
+arcElementRemoval();
+
 
  retrieveWCFromSC();
 
