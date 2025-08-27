@@ -15070,7 +15070,7 @@ function timeSkip({days = 0, months = 0, years = 0} = {}) {
 
 const actionMinutes = {
   eat: 10, drink: 3, cook: 20, clean: 15, bathe: 15, wash: 10, dress: 5, sleep: 480, nap: 60, groom: 7, brush: 5,
-  chat: 15, talk: 10, argue: 12, comfort: 8, teach: 25, scold: 6, debate: 20, joke: 5, lecture: 30, confess: 8,
+  chat: 15, talk: 10, argue: 12, comfort: 8, teach: 25, scold: 6, debate: 20, joke: 5, lecture: 30, confess: 8, mrest: 180,
   feed: 7, soothe: 7, cuddle: 6, hug: 3, kiss: 2, play: 15, babysit: 30, care: 18, rock: 5, tuck: 5, discipline: 7,
   cry: 3, laugh: 2, sulk: 8, reminisce: 10, daydream: 7, meditate: 12, worry: 5,
   walk: 10, run: 4, jog: 6, hike: 18, ride: 15, sail: 30, row: 18, climb: 9, sneak: 6, swim: 12, fly: 25, explore: 18,
@@ -15083,8 +15083,18 @@ const actionMinutes = {
 
 const actionRegexList = [
   // [regex, key in actionMinutes]   // <==Currently being tested
-  [/\bsleep\b/, 'sleep'],
-  [/\bnap\b|\brest\b/, 'nap'],
+// 1️⃣ Nap / light rest (60 min) — short/light rests
+[ /\byou\b(?:\s+\w+){0,3}?\s+(take|catch|have|grab|lie down|snuggle|settle|drift|relax|decide to take)\s+(?:a )?(brief sleep|fleeting sleep|minor sleep|momentary sleep|passing sleep|quick sleep|short sleep|tiny sleep|transient sleep|breath|breathe|breathing|nap|snooze|siesta|rest)/i, 'nap' ],
+
+// 2️⃣ Moderate rest (mrest, 180 min) — medium rests
+[ /\byou\b(?:\s+\w+){0,3}?\s+(take|get|settle|lie down|snuggle|head for|proceed|prepare)\s+(?:a )?(catnap|doze|light sleep|power nap|repose|rest|siesta|snooze)/i, 'mrest' ],
+
+// 3️⃣ Full sleep (sleep, 480 min) — long/uninterrupted rests
+[ /\byou\b(?:\s+\w+){0,3}?\s+(fall|drift|go|turn in|lie down|make|slip|enter|surrender|crawl|sink|head|step|move|sleep|transition|lay)\s+(?:to|into|in)?\s*(deep sleep|deeply sleep|slumber|bed|hibernation|hibernate|uninterrupted sleep|rejuvenating sleep)/i, 'sleep' ],
+
+
+
+
   [/\beat\b|\bbreakfast|\blunch\b|\bdinner\b|\bmeal\b|\bsnack/, 'eat'],
   [/\b(drink(?!\s*(ale|beer|wine|liquor)))|\bsip\b|\bbeverage\b|\bwater\b|\btea\b|\bcoffee\b/, 'drink'],
   [/\bdrink (ale|beer|wine|liquor)\b/, 'drinkalcohol'],
