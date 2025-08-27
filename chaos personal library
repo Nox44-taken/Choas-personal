@@ -9154,6 +9154,7 @@ function storeCurrToSC() {
     `Year: ${state.globalTime.year}\n` +
     `Month-Day: ${String(state.globalTime.month).padStart(2, '0')}-${String(state.globalTime.day).padStart(2, '0')}\n` +
     `Hour-Minute: ${String(state.globalTime.hour).padStart(2, '0')}:${String(state.globalTime.minute).padStart(2, '0')}\n` +
+    `Turns Per Removal: ${state.turnsPerElemRemoval}\n` +
     `Current Heat: ${state.heat}\n` +
     `Current Temperature: ${state.storyTemperature}\n` +
     `Current turn: ${state.turnNum_SAE}\n` +
@@ -9206,6 +9207,9 @@ function retrieveCurrFromSC() {
     const [hour, minute] = value.split(':').map(Number);
     state.globalTime.hour = hour;
     state.globalTime.minute = minute;
+    }
+     else if (key === "Turns Per Removal") {
+      state.turnsPerElemRemoval = Number(value);
     }
     else if (key === "Current Heat") {
       state.heat = Number(value);
@@ -11840,426 +11844,7 @@ function detectScout(text){
   Purplejump - Testing, feedback
 */
 
-onLibrary_SAE();
-function onLibrary_SAE(){
-  // Update settingsSC at start of every hook
-  createIfNoSettingsSC();
-  retrieveSettingsFromSC();
-  storeSettingsToSC();
-  
-  // Update ArcSC at the start of every hook
-  createIfNoArcSC();
-  retrieveArcFromSC();
-  storeArcToSC();
-}
 
-function onInput_SAE(text){
-  text = helpCommandInput_SAE(text);
-
-  text = detectRedoStoryArc(text);
-
-  text = detectStopGenerating(text);
-
-  return text;
-}
-
-function onContext_SAE(text){
-  text = removeAngleText(text);
-  
-  text = feedAIPrompt(text);
-
-  text = feedStoryArc(text);
-  
-  text = logContextToSettingsSC(text);
-  //log(text);
-  
-  return text;
-}
-
-function onOutput_SAE(text) {
-  text = helpCommandOutput_SAE(text);
-
-  text = saveStoryArc(text);
-  //log("state.storyArc", state.storyArc);
-
-  text = callAIForArc(text);
-  
-  log(text);
-
-  arcElementRemoval();
-
-  turnCounter_SAE();
-  
-  return text;
-}
-
-function helpCommandInput_SAE(text){
-  if(text.includes("/help sae")){
-    text = " ";
-
-    state.commandCenter_SAE = 
-    `
-    << 
-    STORY ARC ENGINE By Yi1i1i
-    - Story Arc Engine calls the AI to create a story arc in the Author's notes to better guide future storytelling.
-    - Type "Story Arc" into story cards to access and modify settings. Logs are logged in the notes.
-    - Input "/redo arc" to call the AI to regen the story arc.
-    - Text encased in << >> are auto cleared from context.
-    - Repeated attempts for generating story arcs may be due to AI failing to fulfill instructions or low response length (< 125). Troubleshoot by stopping and retrying in a few turns, or edit your arc prompt in "Story Arc Settings".
-
-    - turnsPerAICall: Number of turns before calling AI to update the story arc. Takes in an integer.
-    - arcPrompt: Prompt that is fed to the AI to generate a story arc. Must be encased in << >>.
-    - attemptLimit: Number of attempts at generating story arc before stopping.
-    - turnsPerElemRemoval: Number of turns before removing the first plot point to progress the arc. Set to 0 to turn off removal.
-    >>
-    `
-  }
-
-  return text;
-}
-
-function helpCommandOutput_SAE(text){
-  if(state.commandCenter_SAE){
-    text = state.commandCenter_SAE;
-  }
-  delete state.commandCenter_SAE
-  return text;
-}
-
-// Prompt to be fed to AI context
-state.arcPrompt = state.arcPrompt || [`
-<<</SYSTEM>  
-- Stop the story.  
-- Only write a structured story arc outline for the future succeeding the current story by following these strict instructions:  
-- Write a numbered list of 11 major events within the story arc.  
-- Each event must be under 7 words.  
-- Events must be in chronological order.  
-- Each event must build on the last and be further in the future.  
-- Dont write clichés, dialogue, description, and prose.  
-- Dont write the protagonist, main character, and player.  
-- Use only brief, high-level story developments.  
-- Events contain turning points, twists, discoveries, conflicts, motives, and lore.  
-- Maintain immersion and consistent narrative tone.>>`
-];
-
-// Initialize variables
-if(state.unlockFeedAIPrompt == undefined){
-  state.unlockFeedAIPrompt = false;
-}
-
-if(state.saveOutput == undefined){
-  state.saveOutput = false;
-}
-
-if(state.storyArc == undefined){
-  state.storyArc = "";
-}
-
-if(state.attemptCounter == undefined){
-  state.attemptCounter = 0;
-}
-
-if (state.turnNum_SAE == undefined) {
-  state.turnNum_SAE = 1;
-}
-
-state.attemptLimit = state.attemptLimit || 3;
-
-state.turnsPerElemRemoval = state.turnsPerElemRemoval || 3;
-
-state.turnsPerAICall = state.turnsPerAICall || 35;
-log("state.turnsPerAICall: " + state.turnsPerAICall);
-
-// SAE Functions
-// Increment turn counter at end of onOutput
-function turnCounter_SAE(){
-  state.turnNum_SAE += 1;
-  log("state.turnNum_SAE: " + state.turnNum_SAE);
-}
-
-// Remove script texts to clean AI context
-function removeAngleText(text) {
-  return text.replace(/<<[\s\S]*?>>/g, '');
-}
-
-function createIfNoArcSC(){
-  if (!storyCards.find(sc => sc.title === "Current Story Arc")) {
-    // If sc doesn't exist, create it
-    addStoryCard("Current Story Arc", "", "Current Story Arc");
-
-    // Fetch the sc
-    const arcSC = storyCards.find(sc => sc.title === "Current Story Arc");
-    arcSC.keys = "/Current Story Arc"
-    arcSC.description = "SPOILERS! This story card stores the story arc being fed to the AI to improve storytelling. Feel free to modify the contents.";
-  }
-}
-
-function storeArcToSC(){
-  // Fetch the sc
-  const arcSC = storyCards.find(sc => sc.title === "Current Story Arc");
-
-  arcSC.entry = state.storyArc;
-}
-
-function retrieveArcFromSC(){
-  // Fetch the sc
-  const arcSC = storyCards.find(sc => sc.title === "Current Story Arc");
-
-  state.storyArc = arcSC.entry;
-}
-
-function createIfNoSettingsSC(){
-  if (!storyCards.find(sc => sc.title === "Story Arc Settings")) {
-    // If sc doesn't exist, create it
-    addStoryCard("Story Arc Settings", "", "Story Arc Settings");
-
-    // Fetch the sc
-    const settingsSC = storyCards.find(sc => sc.title === "Story Arc Settings");
-    settingsSC.description = `
-    turnsPerAICall: Number of turns before calling AI to update the story arc. Takes in an integer.
-    arcPrompt: Prompt that is fed to the AI to generate a story arc. Must be encased in << >>.
-    attemptLimit: Number of attempts at generating story arc before stopping.
-    turnsPerElemRemoval: Number of turns before removing the first plot point to progress the arc. Set to 0 to turn off removal.
-    `;
-  }
-}
-
-function storeSettingsToSC(){
-  // Fetch the sc
-  const settingsSC = storyCards.find(sc => sc.title === "Story Arc Settings");
-
-  settingsSC.entry = `turnsPerAICall = ${state.turnsPerAICall}\nattemptLimit = ${state.attemptLimit}\nturnsPerElemRemoval = ${state.turnsPerElemRemoval}\narcPrompt = ${state.arcPrompt}`
-}
-
-function retrieveSettingsFromSC(){
-  // Fetch the sc
-  const settingsSC = storyCards.find(sc => sc.title === "Story Arc Settings");
-
-  // Extract turnsPerAICall
-  const turnsMatch = settingsSC.entry.match(/turnsPerAICall\s*=\s*(\d+)/);
-  if (turnsMatch) {
-    state.turnsPerAICall = Number(turnsMatch[1]) ?? state.turnsPerAICall;
-  }
-
-  // Extract attemptLimit
-  const limitMatch = settingsSC.entry.match(/attemptLimit\s*=\s*(\d+)/);
-  if (limitMatch) {
-    state.attemptLimit = Number(limitMatch[1]) ?? state.attemptLimit;
-  }
-
-  // Extract turnsPerElemRemoval
-  const removalMatch = settingsSC.entry.match(/turnsPerElemRemoval\s*=\s*(\d+)/);
-  if (removalMatch) {
-    state.turnsPerElemRemoval = Number(removalMatch[1]) ?? state.turnsPerElemRemoval;
-  }
-
-  // Extract arcPrompt block
-  const promptMatch = settingsSC.entry.match(/arcPrompt\s*=\s*(<<[\s\S]*?>>)/);
-  if (promptMatch) {
-    state.arcPrompt = promptMatch[1];
-  }
-
-}
-
-// On output, waits for the correct turn to call AI for generating story arc
-function callAIForArc(text){
-  if (state.turnNum_SAE == 1 || state.turnNum_SAE % state.turnsPerAICall === 0) {
-    // Warn player of AI call next turn
-    text = text + "\n\n<< ⚠️ Updating Story Arc Next Turn! Click 'Continue' or type '/stop'. >>";
-
-    // Unlock feed prompt to AI for onContext
-    state.unlockFeedAIPrompt = true;
-    log("state.unlockFeedAIPrompt: " + state.unlockFeedAIPrompt);
-
-    // Unlock save resulting output to save story arc for next onOutput
-    state.saveOutput = true;
-    log("state.saveOutput: " + state.saveOutput);
-  }
-
-  return text;
-}
-
-// After AI is called, this function will feed the prompt onContext for AI to create a story arc
-function feedAIPrompt(text){
-  if(state.unlockFeedAIPrompt){
-    text = text + " " + state.arcPrompt;
-
-    // Turn off after done feeding
-    state.unlockFeedAIPrompt = false;
-  }
-
-  return text;
-}
-
-// After AI call and prompt is fed to context, this function saves the generated story arc during the following output hook
-function saveStoryArc(text){
-  if(state.saveOutput){
-    // Copy the generated story arc from the output text
-    outputtedArc = text;
-
-    // Clean story arc text to ensure no incomplete numbered lines
-    log("Before: ", outputtedArc);
-    outputtedArc = outputtedArc.replace(/\n?\d+\.\s*$/, '');
-    outputtedArc = outputtedArc
-      .split('\n')
-      .filter(line => /^\d+\.\s/.test(line.trim()))
-      .join('\n');
-    log("After: ", outputtedArc);
-
-    // Incorrect story arc formatting recalls AI
-    if (!/[89]/.test(outputtedArc)) {
-      // SAE Attempt Limit
-      if (state.attemptCounter == state.attemptLimit) {
-        state.saveOutput = false;
-
-        state.attemptCounter = 0;
-
-        text = `\n<< 🧱 Attempt Limit Reached: Keeping Current Arc. Type '/redo arc' or wait for next AI call. >>`
-
-      }
-      else {
-        state.unlockFeedAIPrompt = true;
-        state.saveOutput = true;
-
-        state.attemptCounter += 1;
-
-        text = `\n<< ⏳ Generating Story Arc (Attempt ${state.attemptCounter}/${state.attemptLimit})... Click 'Continue' or type '/stop'. >>`;
-      }
-    }
-    // Correct story arc formatting gets saved
-    else {
-      state.attemptCounter = 0;
-
-      state.storyArc = "Write the story in the following direction:\n" + outputtedArc;
-
-      text = "\n<< ✅ Story Arc generated and saved! Click 'Continue'. >>\n\n";
-
-      // Fetch the sc and log the previous arc in sc notes
-      const arcSC = storyCards.find(sc => sc.title === "Current Story Arc");
-      arcSC.description = `Log ${state.turnNum_SAE} | Previous Story Arc:\n${arcSC.entry}\n` + arcSC.description;
-
-      // Trim notes on char limit to prevent memory overfill
-      if (arcSC.description.length > 3000) {
-        halfIndex = Math.floor(arcSC.description.length / 2);
-        arcSC.description = arcSC.description.slice(0, halfIndex);
-
-        console.log("Trimming arcSC description to prevent memory overload.");
-      }
-
-      // Save the new story arc to the sc
-      storeArcToSC();
-
-      // Turn off save output when done saving story arc
-      state.saveOutput = false;
-
-    }
-  }
-
-  return text;
-}
-
-// Feeds the Story Arc into the Author's Note in the AI context every turn
-function feedStoryArc(text){
-  // Ensure story arc is fed only when a new story arc is not being generated
-  if(state.saveOutput == false){
-    text = text.replace(
-      /(\[Author's note: [\s\S]*?)(])/,
-      (_, noteStart, noteEnd) => noteStart + "\n" + state.storyArc + noteEnd
-    );
-  }
-
-  return text;
-}
-
-function detectRedoStoryArc(text){
-  if(text.includes("/redo arc")){
-    state.unlockFeedAIPrompt = true;
-    state.saveOutput = true;
-
-    text = "<< ➰ Regenerating Story Arc... >>"
-  }
-
-  return text;
-}
-
-// Function to allow player to stop story arc generating
-function detectStopGenerating(text){
-  if(text.includes("/stop") && state.unlockFeedAIPrompt == true){
-    state.unlockFeedAIPrompt = false;
-    state.saveOutput = false;
-
-    state.attemptCounter = 0;
-
-    text = "<< ⛔ Story Arc Generation Stopped. >>";
-  }
-
-  return text;
-}
-
-function logContextToSettingsSC(text){
-  // Fetch the sc
-  const settingsSC = storyCards.find(sc => sc.title === "Story Arc Settings");
-  
-  // Trim notes on char limit to prevent memory overfill
-  if(settingsSC.description.length > 3000){
-    halfIndex = Math.floor(settingsSC.description.length / 2);
-    settingsSC.description = settingsSC.description.slice(0, halfIndex);
-
-    console.log("Trimming settingsSC description to prevent memory overload.");
-  }
-
-  // Log to setting sc notes
-  settingsSC.description = `Context Log ${state.turnNum_SAE} | ${text}\n` + settingsSC.description;
-
-  return text;
-}
-
-function removeFirstListItem(text) {
-  // Match numbered list using regex, starting from a line that begins with a number
-  const lines = text.split('\n');
-
-  // Find the index where the numbered list starts
-  const startIndex = lines.findIndex(line => /^\d+\.\s/.test(line));
-  if (startIndex === -1) return text; // No list found
-
-  // Extract text before the list and the list itself
-  const beforeList = lines.slice(0, startIndex);
-  const listLines = lines.slice(startIndex);
-
-  // Remove first list item
-  listLines.shift();
-
-  // Renumber the remaining list
-  const renumberedList = listLines.map((line, idx) => {
-    return `${idx + 1}. ${line.replace(/^\d+\.\s*/, '')}`;
-  });
-
-  // Reassemble the full text
-  return [...beforeList, ...renumberedList].join('\n');
-}
-
-// Remove the first plot element in story arc every set turn to help clean and progress story arc
-function arcElementRemoval(){
-  if(state.saveOutput == false
-  && state.turnNum_SAE >= 5 
-  && state.turnNum_SAE % state.turnsPerElemRemoval == 0 
-  && state.turnsPerElemRemoval !== 0
-  ){
-    // Fetch the sc and log the previous arc in sc notes
-    const arcSC = storyCards.find(sc => sc.title === "Current Story Arc");
-
-    // Get first plot element to be removed and log to sc description
-    match = state.storyArc.match(/^1\.\s.*$/m);
-    if(match){
-      arcSC.description = `Log ${state.turnNum_SAE} | Plot Element Removed:\n${match[0]}\n` + arcSC.description;
-    }
-
-    // Remove first plot element and save the rest of the story arc
-    state.storyArc = removeFirstListItem(state.storyArc);
-    storeArcToSC();
-    log("\narcElementRemoval ran.")
-  }
-}
 
 
 // Your other library scripts go here
@@ -14478,9 +14063,8 @@ const Epoch = (() => {
 
     // --- HELPER FUNCTION FOR IN-BODY SYSTEM MESSAGES ---
     function formatSystemMessage(messageContent) {
-        return `\n\n🔹🔹🔹🔹🔹\n${messageContent.trim()}\n🔹🔹🔹🔹🔹\n\n`;
+       return `\n\n[SYSTEM-MSG-START]\n${messageContent.trim()}\n[SYSTEM-MSG-END]\n\n`;
     }
-
     // --- TEXT SIMILARITY SCORE FUNCTION ---
     function textSimilarityScore(strA, strB) {
         if (strA === strB) return 1;
@@ -14506,7 +14090,7 @@ const Epoch = (() => {
     const Formatter = {
         defaults: {
             isEnabled: true, enableClicheRemover: true, enableRandomReplacer: true, enableRepetitionRemover: true,
-            aggressive_delete: [ "casting long shadows","casting jagged shadows", "Well, well, well", "knuckles go white", "taps her nails", "tapping her nails", "her fingers idly tapping", "Her fingers tap", "fingers drum", "fingers drumming idly", "Her fingers drum idly against the desk", "Her fingers tap idly against the desk", "tapping two fingers", "the cool air in the room making her skin prickle with goosebumps.", "You're something else", "You're full of surprises, aren't you?", "Knuckles white", "manicured nails", "knuckles whiten", "knuckles have turned stark white", "knuckles are bone-white", "knuckles are a stark white", "knuckles turn a stark white", "knuckles have turned a ghostly white", "knuckles are stark white", "knuckles turn stark white", "knuckles turn white", "Knuckles turning white", "knuckles turn a ghostly white", "little mortal", "glinting with mischief", "like a predator circling its prey", "casting long, angular shadows", "The morning sun cast long shadows", "The morning sun cast a warm glow", "practiced ease", "jaw clenching", "dim light", "speaking softly", "Intense", "A chill runs down your spine", "with messy dark hair", "casts a golden hue", "casts a warm glow", "casts long shadows", "ice queen", "look what the cat dragged in", "cat dragged in", "messy brown hair", "Piece of work", "cacophony", "predatory", "cocoon", "folded note", "crumpled piece of paper", "cast long shadows", "panties in a twist", "You've got some balls on you", "The morning sunlight filters through the windows, casting long shadows across the floor.", "the air is thick", "words hang heavy in the air", "The atmosphere is thick with", "you can't help", "Well, aren't you just full of surprises", "your heart beats", "your mind wanders", "voice crackles with", "dimly lit", "sweetheart", "a stark contrast", "a twisted sense of", "breath hot on your face", "hangs in the air", "feel a chill run down your spine", "shiver down your spine", "shiver up your spine", "your voice a mix of", "a wave of", "voice just above a whisper", "eyes gleaming with", "a mixture of surprise and curiosity", "pride and accomplishment", "jolt of electricity", "glowing with an otherworldly light", "smile playing at the corners of his lips", "smile playing at the corners of her lips", "face contorts with anger", "eyes glistening with unshed tears", "unshed tears", "intricately carved wooden box", "the tension in the room is palpable", "hips swaying enticingly", "takes a step closer", "brushes a stray hair from your face", "face set in a grim mask", "mouth set in a grim line", "hand resting on the hilt of his sword", "hand instinctively goes to the hilt of his sword", "the hum of machinery", "merely a pawn in a much larger game", "this changes everything", "could Have fooled me", "but tinged with" ],
+            aggressive_delete: [ "casting long shadows", "Well, well, well", "knuckles go white", "taps her nails", "tapping her nails", "her fingers idly tapping", "Her fingers tap", "fingers drum", "fingers drumming idly", "Her fingers drum idly against the desk", "Her fingers tap idly against the desk", "tapping two fingers", "the cool air in the room making her skin prickle with goosebumps.", "You're something else", "You're full of surprises, aren't you?", "Knuckles white", "manicured nails", "knuckles whiten", "knuckles have turned stark white", "knuckles are bone-white", "knuckles are a stark white", "knuckles turn a stark white", "knuckles have turned a ghostly white", "knuckles are stark white", "knuckles turn stark white", "knuckles turn white", "Knuckles turning white", "knuckles turn a ghostly white", "little mortal", "glinting with mischief", "like a predator circling its prey", "casting long, angular shadows", "The morning sun cast long shadows", "The morning sun cast a warm glow", "practiced ease", "jaw clenching", "dim light", "speaking softly", "Intense", "A chill runs down your spine", "with messy dark hair", "casts a golden hue", "casts a warm glow", "casts long shadows", "ice queen", "look what the cat dragged in", "cat dragged in", "messy brown hair", "Piece of work", "cacophony", "predatory", "cocoon", "folded note", "crumpled piece of paper", "cast long shadows", "panties in a twist", "You've got some balls on you", "The morning sunlight filters through the windows, casting long shadows across the floor.", "the air is thick", "words hang heavy in the air", "The atmosphere is thick with", "you can't help", "Well, aren't you just full of surprises", "your heart beats", "your mind wanders", "voice crackles with", "dimly lit", "sweetheart", "a stark contrast", "a twisted sense of", "breath hot on your face", "hangs in the air", "feel a chill run down your spine", "shiver down your spine", "shiver up your spine", "your voice a mix of", "a wave of", "voice just above a whisper", "eyes gleaming with", "a mixture of surprise and curiosity", "pride and accomplishment", "jolt of electricity", "glowing with an otherworldly light", "smile playing at the corners of his lips", "smile playing at the corners of her lips", "face contorts with anger", "eyes glistening with unshed tears", "unshed tears", "intricately carved wooden box", "the tension in the room is palpable", "hips swaying enticingly", "takes a step closer", "brushes a stray hair from your face", "face set in a grim mask", "mouth set in a grim line", "hand resting on the hilt of his sword", "hand instinctively goes to the hilt of his sword", "the hum of machinery", "merely a pawn in a much larger game", "this changes everything", "could Have fooled me", "but tinged with" ],
             precise_delete: [ "looming ominously" ],
             replace: [ ["verdant", "green"], ["curtly", "shortly"], ["leverage", "use"], ["robust", "strong"], ["unprecedented", "new"], ["myriad", "many"], ["commence", "start"], ["ascertain", "find out"], ["endeavor", "try"], ["utilize", "use"], ["facilitate", "help"], ["plethora", "a lot"], ["elucidate", "explain"], ["exemplify", "show"], ["paradigm", "model"], ["synergy", "teamwork"], ["traverse", "cross"], ["illuminate", "explain"], ["manifest", "show"], ["intricate", "complex"], ["subsequent", "next"], ["procure", "get"], ["amidst", "among"], ["visage", "face"], ["peruse", "read"], ["cascade", "flow"], ["linger", "stay"], ["fervor", "excitement"], ["tranquil", "calm"], ["emanate", "come from"], ["beckon", "call"], ["venture", "go"], ["gaze", "look"], ["inquire", "ask"], ["exclaim", "shout"], ["murmur", "whisper"] ],
             name_replace: [ ["Li1ly", "Lorelei"], ["Lisf42a", "Larisa"], ["Sa1lawt", "Solène"], ["J32ake", "Jasper"], ["A14lx", "Abel"] ],
@@ -14642,7 +14226,7 @@ const Epoch = (() => {
             }
             state.currentActionTypeForTimeAdvance = 'continue'; 
         },
-        appendTimestampsToText: function(txtToMod){if(!state.stt||!state.stt.isEnabled||typeof txtToMod!=='string')return txtToMod;const turn=(typeof info!=='undefined'&&Number.isFinite(info.actionCount))?info.actionCount:0;let tsStr="";const isSysOut=/🔹🔹🔹🔹🔹|\[SYSTEM:.*\]|>>>|<<<|{>/.test(txtToMod.trim());if(state.stt.showDateTimestamp&&turn>0&&turn%state.stt.dateTimestampFrequency===0){tsStr+=` [📅 Date: ${this.getFormattedTime(false)}]`;}if(state.stt.showTimeTimestamp&&turn>0&&turn%state.stt.timeTimestampFrequency===0){tsStr+=` [⏰ Time: ${String(state.stt.gameHour||0).padStart(2,'0')}:${String(state.stt.gameMinute||0).padStart(2,'0')} (${this.getDayNightStatus()})]`;}if(tsStr){if(state.stt.useToastForTimestamps&&!isSysOut){if(!state.toastQueue)state.toastQueue=[];state.toastQueue.push(tsStr.trim());return txtToMod;}else if(!isSysOut){return`${txtToMod.trim()}\n${tsStr.trim()}`;}}return txtToMod;},
+        appendTimestampsToText: function(txtToMod){if(!state.stt||!state.stt.isEnabled||typeof txtToMod!=='string')return txtToMod;const turn=(typeof info!=='undefined'&&Number.isFinite(info.actionCount))?info.actionCount:0;let tsStr="";const isSysOut=/\[SYSTEM-MSG-START\]|\[SYSTEM:.*\]|>>>|<<<|{>/.test(txtToMod.trim());if(state.stt.showDateTimestamp&&turn>0&&turn%state.stt.dateTimestampFrequency===0){tsStr+=` [📅 Date: ${this.getFormattedTime(false)}]`;}if(state.stt.showTimeTimestamp&&turn>0&&turn%state.stt.timeTimestampFrequency===0){tsStr+=` [⏰ Time: ${String(state.stt.gameHour||0).padStart(2,'0')}:${String(state.stt.gameMinute||0).padStart(2,'0')} (${this.getDayNightStatus()})]`;}if(tsStr){if(state.stt.useToastForTimestamps&&!isSysOut){if(!state.toastQueue)state.toastQueue=[];state.toastQueue.push(tsStr.trim());return txtToMod;}else if(!isSysOut){return`${txtToMod.trim()}\n${tsStr.trim()}`;}}return txtToMod;},
         handleContext: function(text) {
             if(!state.stt || !state.stt.isEnabled || typeof text!=='string') return text;
             let p = "";
@@ -14665,9 +14249,21 @@ const Epoch = (() => {
 
 
 // —————————————————————————————————————————————————————————————————————————————————
-// MODULE: STORY ARC ENGINE (SAE)
+// MODULE: STORY ARC ENGINE (SAE)- with mid game fix
 // —————————————————————————————————————————————————————————————————————————————————
-
+const SAE = { 
+        defaults: { isEnabled: true, turnsPerAICall: 25, arcPrompt: `\n[SYSTEM: Stop story. List 11 brief, chronological future events (under 7 words each). Focus on turning points/twists, adhering to specified tone/intensity.]\n`, arcTone: null, arcIntensity: null, toneChosen: false, intensityChosen: false, storyArc: [], activePointIndex: 0, completionSuggested: false, isGenerating: false, saveOutput: false, attemptCounter: 0, hasRunEarly: false, initialized: true, initialized_mid_game: undefined, trigger_initial_arc_on_load: false, postReinitMessage: null },
+        tonePrompts:{"sliceoflife":" Focus on personal relationships, daily routines, gentle challenges, character growth. Avoid grand conflicts.","adventure":" Emphasize exploration, discovery, overcoming obstacles, exciting journeys. Include danger & reward.","mystery":" Weave clues, red herrings, secrets, a central puzzle. Build suspense.","romance":" Center on romantic relationship development, emotional connection, obstacles to love, milestones.","intrigue":" Involve political maneuvering, espionage, hidden agendas, betrayal, power struggles. Subtlety & deception.","horror":" Create dread, fear, unease. Unsettling elements, psychological tension, supernatural threats. Player vulnerability.","darkfantasy":" Morally grey characters, bleak settings, corruption. Good may not triumph. Magic dangerous/costly.","heroicfantasy":" Clear good vs evil, brave heroes, powerful villains, magical quests, triumph of good.","comedy":" Prioritize humor, witty dialogue, absurd situations, lighthearted resolutions.","gritty":" Harsh, realistic world, difficult choices, moral ambiguity, consequences. Survival themes.","custom":""},
+        intensityPrompts:{"relaxed":" Leisurely pace, minimal pressure/threat. Pleasant interactions, minor issues.","moderate":" Meaningful challenges & stakes requiring effort, without overwhelming pressure.","challenging":" Significant obstacles, tough decisions with consequences, palpable risk. Success earned.","intense":" High-stakes, constant pressure, difficult moral choices, potential for severe consequences/failure."},
+        initialize: function(acAPI) { this.acAPI = acAPI; let wasFreshSAEInit = false; if (!state.sae || !state.sae.initialized) { state.sae = JSON.parse(JSON.stringify(this.defaults)); wasFreshSAEInit = true; } else { for (const key in this.defaults) { if (state.sae[key] === undefined) { state.sae[key] = JSON.parse(JSON.stringify(this.defaults[key])); } } } state.sae.initialized = true; state.sae.postReinitMessage = null; if (state.sae.initialized_mid_game === undefined || wasFreshSAEInit) { const currentTurn = (typeof info !== 'undefined' && info.actionCount !== undefined) ? info.actionCount : 0; if (currentTurn > 7 && (wasFreshSAEInit || (!state.sae.hasRunEarly && (!state.sae.storyArc || state.sae.storyArc.length === 0)))) { state.sae.trigger_initial_arc_on_load = true; } state.sae.initialized_mid_game = true; } if (wasFreshSAEInit) { state.sae.postReinitMessage = `Story Arc Engine initialized/reset. Use /setarctype [tone] / [intensity] to begin.`; } },
+        updateAndCreateCards: function() { if (!this.acAPI) return; if (!state.sae) state.sae = JSON.parse(JSON.stringify(this.defaults)); let settingsCard = this.acAPI.getCard(c => c && c.title === "Story Arc Settings"); if (!settingsCard) { settingsCard = this.acAPI.buildCard({ title: "Story Arc Settings", entry: "", keys: "Story Arc Settings", description: "" }); if (!settingsCard) return; } const s = state.sae; if (settingsCard.entry) { const cardEntryText = settingsCard.entry; const settingsOnCard = {}; const lines = cardEntryText.split('\n'); lines.forEach(line => { const parts = line.split('='); if (parts.length >= 2) { const key = parts[0].trim(); const value = parts.slice(1).join('=').trim(); settingsOnCard[key] = value; } }); s.isEnabled = settingsOnCard.hasOwnProperty('isEnabled') ? (settingsOnCard.isEnabled.toLowerCase() === 'true') : (s.isEnabled !== undefined ? s.isEnabled : this.defaults.isEnabled); const parsedTurns = settingsOnCard.hasOwnProperty('turnsPerAICall') ? parseInt(settingsOnCard.turnsPerAICall) : NaN; s.turnsPerAICall = Number.isFinite(parsedTurns) ? parsedTurns : (s.turnsPerAICall !== undefined ? s.turnsPerAICall : this.defaults.turnsPerAICall); if (settingsOnCard.hasOwnProperty('arcTone') && !s.toneChosen) { const cardTone = settingsOnCard.arcTone.toLowerCase(); if (this.tonePrompts.hasOwnProperty(cardTone)) { s.arcTone = cardTone; } } else if (!s.toneChosen && s.arcTone === undefined) { s.arcTone = this.defaults.arcTone; } if (settingsOnCard.hasOwnProperty('arcIntensity') && !s.intensityChosen) { const cardIntensity = settingsOnCard.arcIntensity.toLowerCase(); if (this.intensityPrompts.hasOwnProperty(cardIntensity)) { s.arcIntensity = cardIntensity; } } else if (!s.intensityChosen && s.arcIntensity === undefined) { s.arcIntensity = this.defaults.arcIntensity; } s.arcPrompt = settingsOnCard.hasOwnProperty('arcPrompt') ? settingsOnCard.arcPrompt : (s.arcPrompt !== undefined ? s.arcPrompt : this.defaults.arcPrompt); } else { s.isEnabled = s.isEnabled !== undefined ? s.isEnabled : this.defaults.isEnabled; s.turnsPerAICall = s.turnsPerAICall !== undefined ? s.turnsPerAICall : this.defaults.turnsPerAICall; s.arcTone = (!s.toneChosen && s.arcTone === undefined) ? this.defaults.arcTone : s.arcTone; s.arcIntensity = (!s.intensityChosen && s.arcIntensity === undefined) ? this.defaults.arcIntensity : s.arcIntensity; s.arcPrompt = s.arcPrompt !== undefined ? s.arcPrompt : this.defaults.arcPrompt; } const displayTone = s.arcTone || "Not Set"; const displayIntensity = s.arcIntensity || "Not Set"; const newCardEntry = `isEnabled = ${s.isEnabled}\nturnsPerAICall = ${s.turnsPerAICall}\narcTone = ${displayTone}\narcIntensity = ${displayIntensity}\narcPrompt = ${s.arcPrompt}`; const toneOptions = Object.keys(this.tonePrompts).join(', '); const intensityOptions = Object.keys(this.intensityPrompts).join(', '); const newCardDescription = `⚙️ SAE Controls:\n/setarctype [tone] / [intensity] ✨🔥\n/regeneratearc ✨\n/saestop 🛑\n/currentarcsettings ℹ️\n\nTone Opt: ${toneOptions}\nIntensity Opt: ${intensityOptions}\n\nSettings in entry. 'custom' tone uses arcPrompt.`; if (settingsCard.entry !== newCardEntry) settingsCard.entry = newCardEntry; if (settingsCard.description !== newCardDescription) settingsCard.description = newCardDescription; let arcContentCard = this.acAPI.getCard(c => c && c.title === "Current Story Arc"); if (!arcContentCard) { arcContentCard = this.acAPI.buildCard({ title: "Current Story Arc", entry: "", keys: "Current Story Arc", description: "🤫 SPOILERS! Plot outline." }); if (arcContentCard) s.storyArc = []; } else if (arcContentCard.entry) { const cardArcText = arcContentCard.entry.trim(); if (!s.isGenerating) { s.storyArc = cardArcText ? cardArcText.split('\n').map(l => l.trim()).filter(ln => /^\d+\.\s/.test(ln)) : []; } } else { if (!s.isGenerating) { s.storyArc = []; } } },
+        handleInput: function(rawPlayerInput) { let txt = rawPlayerInput; let cmdH = false; if (!state.sae) return { text: txt, commandHandled: false }; let cmd = (rawPlayerInput || "").trim().toLowerCase(); if (!state.sae.isEnabled && (cmd.startsWith("/regeneratearc") || cmd.startsWith("/setarctype") || cmd.startsWith("/currentarcsettings"))) { txt = formatSystemMessage("⚙️ SAE is off. Check settings card to enable."); cmdH = true; return { text: txt, commandHandled: cmdH }; } if (cmd.startsWith("/setarctype")) { const argString = rawPlayerInput.substring("/setarctype".length).trim(); const parts = argString.split('/'); if (parts.length === 2) { let rawNewTone = parts[0].trim(); let rawNewIntensity = parts[1].trim(); const newTone = rawNewTone.replace(/[.!?]+$/, "").trim().toLowerCase(); const newIntensity = rawNewIntensity.replace(/[.!?]+$/, "").trim().toLowerCase(); let toneValid = this.tonePrompts.hasOwnProperty(newTone); let intensityValid = this.intensityPrompts.hasOwnProperty(newIntensity); if (toneValid && intensityValid) { state.sae.arcTone = newTone; state.sae.arcIntensity = newIntensity; state.sae.toneChosen = true; state.sae.intensityChosen = true; state.sae.isGenerating = true; state.sae.saveOutput = true; state.sae.attemptCounter = 0; state.sae.completionSuggested = false; state.sae.trigger_initial_arc_on_load = false; txt = formatSystemMessage(`🎭 Arc Tone set to: '${newTone}'.\n🔥 Arc Intensity set to: '${newIntensity}'.\n🧠 Brainstorming new story arc...`); } else { let errorMsg = "🤔 Invalid input for /setarctype.\n"; if (!toneValid) errorMsg += `- Unknown tone: '${newTone}' (from input '${rawNewTone}'). Valid: ${Object.keys(this.tonePrompts).join(', ')}\n`; if (!intensityValid) errorMsg += `- Unknown intensity: '${newIntensity}' (from input '${rawNewIntensity}'). Valid: ${Object.keys(this.intensityPrompts).join(', ')}\n`; txt = formatSystemMessage(errorMsg.trim() + "\nUsage: /setarctype [tone] / [intensity]"); } } else { txt = formatSystemMessage("🤔 Usage: /setarctype [tone] / [intensity]\nExample: /setarctype adventure / moderate"); } cmdH = true; } else if (cmd.startsWith("/currentarcsettings")) { const currentToneDisplay = state.sae.arcTone ? `'${state.sae.arcTone}'` : "Not Set (Use /setarctype)"; const currentIntensityDisplay = state.sae.arcIntensity ? `'${state.sae.arcIntensity}'` : "Not Set (Use /setarctype)"; txt = formatSystemMessage(`Current Settings:\n🎭 Tone: ${currentToneDisplay}\n🔥 Intensity: ${currentIntensityDisplay}`); cmdH = true; } else if (cmd.startsWith("/regeneratearc")) { const choicesMade = state.sae.toneChosen && state.sae.intensityChosen; const toneIsValid = choicesMade && state.sae.arcTone && this.tonePrompts.hasOwnProperty(state.sae.arcTone); const intensityIsValid = choicesMade && state.sae.arcIntensity && this.intensityPrompts.hasOwnProperty(state.sae.arcIntensity); if (toneIsValid && intensityIsValid) { state.sae.isGenerating = true; state.sae.saveOutput = true; state.sae.completionSuggested = false; state.sae.attemptCounter = 0; state.sae.trigger_initial_arc_on_load = false; txt = formatSystemMessage(`🧠 Brainstorming new arc (Tone: ${state.sae.arcTone}, Intensity: ${state.sae.arcIntensity})...`); } else { txt = formatSystemMessage(`🤔 Set arc type first using: /setarctype [tone] / [intensity]`); } cmdH = true; } else if (cmd.startsWith("/saestop")) { state.sae.isGenerating = false; state.sae.saveOutput = false; state.sae.attemptCounter = 0; state.sae.trigger_initial_arc_on_load = false; txt = formatSystemMessage("🛑 Arc generation cancelled!"); cmdH = true; } return { text: txt, commandHandled: cmdH }; },
+        handleContext: function(text) { if (!state.sae || !state.sae.isEnabled || typeof text !== 'string') return text; if (state.sae.isGenerating && state.sae.saveOutput) { let basePrompt = state.sae.arcPrompt || this.defaults.arcPrompt; let toneModifier = ""; let intensityModifier = ""; const currentTone = state.sae.arcTone; const currentIntensity = state.sae.arcIntensity; if (currentTone && currentTone !== "custom" && this.tonePrompts.hasOwnProperty(currentTone)) { toneModifier = this.tonePrompts[currentTone]; } if (currentIntensity && this.intensityPrompts.hasOwnProperty(currentIntensity)) { intensityModifier = this.intensityPrompts[currentIntensity]; } let finalPrompt = basePrompt + toneModifier + intensityModifier; return text + finalPrompt; } if (state.sae.storyArc?.length > 0 && state.sae.activePointIndex < state.sae.storyArc.length && !(state.sae.isGenerating && state.sae.saveOutput)) { const currentToneDisplay = state.sae.arcTone || "N/A"; const currentIntensityDisplay = state.sae.arcIntensity || "N/A"; const currentPointText = state.sae.storyArc[state.sae.activePointIndex].replace(/^\d+\.\s*/, ''); const guidancePrompt = `\n[Plot Hint (T:${currentToneDisplay},I:${currentIntensityDisplay}): Towards "${currentPointText}".]\n`; const authorsNoteMatch = text.match(/(\[Author's note:[\s\S]*?)(\])/i); if (authorsNoteMatch) { return text.replace(authorsNoteMatch[0], `${authorsNoteMatch[1]}${guidancePrompt.trim()} ${authorsNoteMatch[2]}`); } return text + `\n[Author's note:${guidancePrompt.trim()}]`; } return text; },
+        shouldTriggerGeneration: function() { const currentTurn = (typeof info !== 'undefined' && Number.isFinite(info.actionCount)) ? info.actionCount : 0; if (!state.sae || state.sae.isGenerating || !state.sae.isEnabled) return false; const choicesMade = state.sae.toneChosen && state.sae.intensityChosen; const toneActuallyValid = choicesMade && state.sae.arcTone && this.tonePrompts.hasOwnProperty(state.sae.arcTone); const intensityActuallyValid = choicesMade && state.sae.arcIntensity && this.intensityPrompts.hasOwnProperty(state.sae.arcIntensity); const typeSettingsAreValidAndChosen = toneActuallyValid && intensityActuallyValid; if (state.sae.trigger_initial_arc_on_load) { if (!typeSettingsAreValidAndChosen) return "choose_type"; return "generate_now"; } if (currentTurn < 2) return false; if (state.sae.hasRunEarly !== true && currentTurn >= 2 && currentTurn <= 7) { if (!typeSettingsAreValidAndChosen) return "choose_type"; return "generate_now"; } if (state.sae.turnsPerAICall > 0 && (currentTurn > 1) && (currentTurn % state.sae.turnsPerAICall === 0)) { if (!typeSettingsAreValidAndChosen) return "choose_type"; return "generate_now"; } return false; },
+        handleOutput: function(text) { if (!state.sae || !state.sae.isEnabled || !state.sae.saveOutput) return text; if (!text || typeof text !== 'string' || text.trim() === '') { state.sae.attemptCounter++; if (state.sae.attemptCounter >= 3) { state.sae.isGenerating = false; state.sae.saveOutput = false; state.sae.attemptCounter = 0; state.sae.trigger_initial_arc_on_load = false; return formatSystemMessage(`😥 AI shy! No arc ideas after 3 tries.`); } else { return formatSystemMessage(`😮 Empty AI response. Retrying arc (${state.sae.attemptCounter + 1}/3)...`); } } const pts = text.split('\n').map(l => l.trim()).filter(ln => /^\d+\.\s/.test(ln)); if (pts.length < 8) { state.sae.attemptCounter++; if (state.sae.attemptCounter >= 3) { state.sae.isGenerating = false; state.sae.saveOutput = false; state.sae.attemptCounter = 0; state.sae.trigger_initial_arc_on_load = false; return formatSystemMessage(`😥 Invalid arc (less than 8 points after 3 tries).`); } else { return formatSystemMessage(`🤔 Not a full arc (got ${pts.length} points). Retrying (${state.sae.attemptCounter + 1}/3)...`); } } else { state.sae.isGenerating = false; state.sae.saveOutput = false; state.sae.attemptCounter = 0; state.sae.activePointIndex = 0; state.sae.completionSuggested = false; state.sae.storyArc = pts; state.sae.trigger_initial_arc_on_load = false; if (state.sae.hasRunEarly !== true) { state.sae.hasRunEarly = true; } if (this.acAPI) { const arcContentCard = this.acAPI.getCard(c => c && c.title === "Current Story Arc"); if (arcContentCard) { const oldEntry = arcContentCard.entry || " "; const turn = (typeof info !== 'undefined' && Number.isFinite(info.actionCount)) ? info.actionCount : 'N/A'; arcContentCard.description = `Log(Turn ${turn})|Previous Arc:\n${oldEntry}\n\n` + (arcContentCard.description || "").substring(0, 1000); arcContentCard.entry = pts.join('\n'); } } return formatSystemMessage(`🎉 New arc (Tone: ${state.sae.arcTone}, Intensity: ${state.sae.arcIntensity}) saved to card!`); } },
+        checkForCompletion: function(currentAiOutputText) { if (!state.sae || !state.sae.isEnabled || !state.sae.storyArc?.length || state.sae.completionSuggested || state.sae.activePointIndex >= state.sae.storyArc.length) return; const activePointText = (state.sae.storyArc[state.sae.activePointIndex] || "").replace(/^\d+\.\s*/, '').trim(); if (!activePointText) return; if (currentAiOutputText && typeof currentAiOutputText === 'string' && currentAiOutputText.trim()) { if (textSimilarityScore(activePointText, currentAiOutputText) > 0.45) { if (!state.toastQueue) state.toastQueue = []; state.toastQueue.push(`[SAE💡: Point "${activePointText}" seems complete.]`); state.sae.completionSuggested = true; } } }
+    };
+    
 // ==================================================================
 // MASTER HOOK FUNCTIONS
 // ==================================================================
@@ -14676,20 +14272,14 @@ function initializeCombinedModules() {
     if (sharedAcAPI === null && typeof AutoCards === 'function') {
         try {
             const acI = AutoCards();
-            if (acI && typeof acI.API === 'object') {
-                sharedAcAPI = acI.API;
-            } else {
-                console.warn(`AutoCards() did not return expected API object.`); // Simplified log
-                sharedAcAPI = null;
-            }
-        } catch (e) {
-            console.error(`Error getting AutoCards API.`, e); // Simplified log
-            sharedAcAPI = null;
-        }
+            if (acI && typeof acI.API === 'object') { sharedAcAPI = acI.API; } 
+            else { console.warn(`AutoCards() did not return expected API object.`); sharedAcAPI = null; }
+        } catch (e) { console.error(`Error getting AutoCards API.`, e); sharedAcAPI = null; }
     }
     Formatter.initialize(sharedAcAPI);
-    STT.initialize(sharedAcAPI);
-    
+    STT.initialize(sharedAcAPI); 
+    SAE.initialize(sharedAcAPI);   
+
     if (state.toastQueue === undefined) state.toastQueue = [];
     if (state.currentActionTypeForTimeAdvance === undefined) {
         const currentTurn = (typeof info !== 'undefined' && Number.isFinite(info.actionCount)) ? info.actionCount : 0;
@@ -14699,9 +14289,28 @@ function initializeCombinedModules() {
 
 globalThis.onInput_Combined = function(text) {
     initializeCombinedModules(); 
+    
+    let postInitMessages = [];
+    if (state.stt && state.stt.postReinitMessage) {
+        postInitMessages.push(state.stt.postReinitMessage);
+        state.stt.postReinitMessage = null; 
+    }
+    if (state.sae && state.sae.postReinitMessage) {
+        postInitMessages.push(state.sae.postReinitMessage);
+        state.sae.postReinitMessage = null; 
+    }
+    if (postInitMessages.length > 0) {
+        const messageStr = postInitMessages.join('\n');
+        if (state.message && typeof state.message === 'string') {
+            state.message += '\n' + messageStr;
+        } else {
+            state.message = messageStr;
+        }
+    }
+    
     Formatter.updateAndCreateCards();
     STT.checkAndCreateCards(); STT.updateSettingsFromCard();
-
+    SAE.updateAndCreateCards();
 
     let currentText = text;
     let finalStopSignal = false;
@@ -14711,58 +14320,25 @@ globalThis.onInput_Combined = function(text) {
     let identifiedPlayerActionForSTT = null;
     let isSystemMessageToIgnore = false;
 
-    const systemMessagePatterns = [
-        /🔹🔹🔹🔹🔹\s*🎭\s*Arc Tone set to:/i,    
-        /🧠\s*Brainstorming new story arc/i,              
-        />>>\s*please select "continue"/i                 
-    ];
-
-    for (const pattern of systemMessagePatterns) {
-        if (pattern.test(rawInputForActionTypeCheck)) {
-            isSystemMessageToIgnore = true;
-            break;
-        }
-    }
+    const systemMessagePatterns = [ /\[SYSTEM-MSG-START\]\s*🎭\s*Arc Tone set to:/i, /🧠\s*Brainstorming new story arc/i, />>>\s*please select "continue"/i ];
+    for (const pattern of systemMessagePatterns) { if (pattern.test(rawInputForActionTypeCheck)) { isSystemMessageToIgnore = true; break; } }
 
     if (!isSystemMessageToIgnore) {
-        if (rawInputForActionTypeCheck.startsWith("> You say") || rawInputForActionTypeCheck.match(/^\s*say\s*["“]/i)) {
-            identifiedPlayerActionForSTT = "say";
-        } else if (rawInputForActionTypeCheck.startsWith("> You do") || rawInputForActionTypeCheck.match(/^\s*do\s*["“]/i) || rawInputForActionTypeCheck.match(/^\s*>\s*you\s+[^s][^a][^y]/i) ) { 
-            identifiedPlayerActionForSTT = "do";
-        } else if (rawInputForActionTypeCheck.startsWith("> You add to the story") || rawInputForActionTypeCheck.startsWith("> Story:")) {
-            identifiedPlayerActionForSTT = "story";
-        } else if (!rawInputForActionTypeCheck.startsWith("/")) { 
-            if (rawInputForActionTypeCheck && !identifiedPlayerActionForSTT) {
-                 if (rawInputForActionTypeCheck.length > 0) {
-                    identifiedPlayerActionForSTT = "story";
-                 }
-            }
-        }
+        if (rawInputForActionTypeCheck.startsWith("> You say") || rawInputForActionTypeCheck.match(/^\s*say\s*["“]/i)) { identifiedPlayerActionForSTT = "say";
+        } else if (rawInputForActionTypeCheck.startsWith("> You do") || rawInputForActionTypeCheck.match(/^\s*do\s*["“]/i) || rawInputForActionTypeCheck.match(/^\s*>\s*you\s+[^s][^a][^y]/i) ) { identifiedPlayerActionForSTT = "do";
+        } else if (rawInputForActionTypeCheck.startsWith("> You add to the story") || rawInputForActionTypeCheck.startsWith("> Story:")) { identifiedPlayerActionForSTT = "story";
+        } else if (!rawInputForActionTypeCheck.startsWith("/")) { if (rawInputForActionTypeCheck && !identifiedPlayerActionForSTT && rawInputForActionTypeCheck.length > 0) { identifiedPlayerActionForSTT = "story"; } }
     }
 
     let commandInput = (text || "").trim();
     let commandCandidateAfterPrefixStrip = commandInput;
-    const playerActionPrefixes = [ 
-        /^\s*>\s*you\s+verb\s+/i, /^\s*>\s*you\s*say\s*:\s*/i, /^\s*>\s*you\s*/i, /^\s*>\s*/i
-    ];
-    for (const prefixRegex of playerActionPrefixes) {
-        if (prefixRegex.test(commandCandidateAfterPrefixStrip)) {
-            commandCandidateAfterPrefixStrip = commandCandidateAfterPrefixStrip.replace(prefixRegex, "").trim();
-            break;
-        }
-    }
+    const playerActionPrefixes = [ /^\s*>\s*you\s+verb\s+/i, /^\s*>\s*you\s*say\s*:\s*/i, /^\s*>\s*you\s*/i, /^\s*>\s*/i ];
+    for (const prefixRegex of playerActionPrefixes) { if (prefixRegex.test(commandCandidateAfterPrefixStrip)) { commandCandidateAfterPrefixStrip = commandCandidateAfterPrefixStrip.replace(prefixRegex, "").trim(); break; } }
     let potentialDirectCommand = commandCandidateAfterPrefixStrip;
-    const sayWrappedCommandRegex = /^\s*say\s+["'](.+?)["']\s*$/i;
-    const justQuotedCommandRegex = /^\s*["'](.+?)["']\s*$/i;
+    const sayWrappedCommandRegex = /^\s*say\s+["'](.+?)["']\s*$/i; const justQuotedCommandRegex = /^\s*["'](.+?)["']\s*$/i;
     let sayMatch = potentialDirectCommand.match(sayWrappedCommandRegex);
-    if (sayMatch && sayMatch[1] && sayMatch[1].trim().startsWith('/')) {
-        potentialDirectCommand = sayMatch[1].trim();
-    } else {
-        let quoteMatch = potentialDirectCommand.match(justQuotedCommandRegex);
-        if (quoteMatch && quoteMatch[1] && quoteMatch[1].trim().startsWith('/')) {
-            potentialDirectCommand = quoteMatch[1].trim();
-        }
-    }
+    if (sayMatch && sayMatch[1] && sayMatch[1].trim().startsWith('/')) { potentialDirectCommand = sayMatch[1].trim();
+    } else { let quoteMatch = potentialDirectCommand.match(justQuotedCommandRegex); if (quoteMatch && quoteMatch[1] && quoteMatch[1].trim().startsWith('/')) { potentialDirectCommand = quoteMatch[1].trim(); } }
     const cleanedCommandForMatching = potentialDirectCommand.toLowerCase();
 
     let modRes = null; 
@@ -14770,60 +14346,66 @@ globalThis.onInput_Combined = function(text) {
 
     if (cleanedCommandForMatching.startsWith('/')) {
         if (cleanedCommandForMatching.startsWith('/ac') || cleanedCommandForMatching.startsWith('/acredo')) { 
-            if (typeof AutoCards === 'function') {
-                let acResult = AutoCards("input", originalTextForAC, false); 
+            if (typeof AutoCards === 'function') { 
+                let acResult = AutoCards("input", originalTextForAC, false);
                 currentText = (typeof acResult === 'object' && acResult.text !== undefined) ? acResult.text : (Array.isArray(acResult) ? acResult[0] : originalTextForAC);
                 finalStopSignal = (typeof acResult === 'object' && acResult.stop !== undefined) ? acResult.stop : (Array.isArray(acResult) ? acResult[1] : false);
             }
+            commandWasHandledByModule = true; // Mark /ac as handled by a module
             state.currentActionTypeForTimeAdvance = 'system_command'; 
             return { text: currentText, stop: finalStopSignal }; 
         }
+        else if (cleanedCommandForMatching === '/reinit_plugins') {
+            state.formatter = null; state.stt = null; state.sae = null;
+            initializeCombinedModules(); 
+            currentText = formatSystemMessage("🔌 All core plugins re-initialized to their default states.");
+            
+            postInitMessages = []; // Re-collect messages after re-init
+            if (state.stt && state.stt.postReinitMessage) { postInitMessages.push(state.stt.postReinitMessage); state.stt.postReinitMessage = null; }
+            if (state.sae && state.sae.postReinitMessage) { postInitMessages.push(state.sae.postReinitMessage); state.sae.postReinitMessage = null; }
+            if (postInitMessages.length > 0) { currentText += "\n" + postInitMessages.join("\n"); }
+
+            commandWasHandledByModule = true;
+            finalStopSignal = true;
+            // No early return here, let the normal flow set currentActionTypeForTimeAdvance
+        }
         else if (STT.handleInput && (cleanedCommandForMatching.startsWith('/settime') || cleanedCommandForMatching.startsWith('/setdate') || cleanedCommandForMatching.startsWith('/defer') || cleanedCommandForMatching.startsWith('/wait'))) {
             modRes = STT.handleInput(potentialDirectCommand);
-            if (modRes && modRes.commandHandled) {
-                commandWasHandledByModule = true; 
-                let finalOutputText = modRes.text;
-                if (cleanedCommandForMatching.startsWith('/defer')) {
-                     let playerNarrative = "";
-                    if (commandCandidateAfterPrefixStrip.toLowerCase().includes(cleanedCommandForMatching)) {
-                        let tempNarrative = commandCandidateAfterPrefixStrip;
-                        const escapedCmd = potentialDirectCommand.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                        const cmdRegex = new RegExp(escapedCmd, "i");
-                        tempNarrative = tempNarrative.replace(cmdRegex, "").trim();
-                        if (tempNarrative) { playerNarrative = tempNarrative; }
-                    }
-                    if (playerNarrative) {
-                        currentText = `${playerNarrative}\n\n${finalOutputText.trim()}\n\n[The story continues after this time skip.]`;
-                    } else {
-                        currentText = `${finalOutputText.trim()}\n\n[The story jumps forward. Describe what happens or the scene after this passage of time.]`;
-                    }
-                } else { currentText = finalOutputText; }
-                finalStopSignal = false; 
-            }
+            if (modRes && modRes.commandHandled) { commandWasHandledByModule = true; }
         }
-
+        else if (SAE.handleInput && (cleanedCommandForMatching.startsWith('/setarctype') || cleanedCommandForMatching.startsWith('/currentarcsettings') || cleanedCommandForMatching.startsWith('/regeneratearc') || cleanedCommandForMatching.startsWith('/saestop'))) {
+            modRes = SAE.handleInput(potentialDirectCommand);
+            if (modRes && modRes.commandHandled) { commandWasHandledByModule = true; }
+        }
+        
+        if (commandWasHandledByModule && modRes) { 
+            if (cleanedCommandForMatching.startsWith('/defer')) {
+                 let playerNarrative = "";
+                if (commandCandidateAfterPrefixStrip.toLowerCase().includes(cleanedCommandForMatching)) {
+                    let tempNarrative = commandCandidateAfterPrefixStrip; const escapedCmd = potentialDirectCommand.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'); const cmdRegex = new RegExp(escapedCmd, "i"); tempNarrative = tempNarrative.replace(cmdRegex, "").trim(); if (tempNarrative) { playerNarrative = tempNarrative; }
+                }
+                if (playerNarrative) { currentText = `${playerNarrative}\n\n${modRes.text.trim()}\n\n[The story continues after this time skip.]`;
+                } else { currentText = `${modRes.text.trim()}\n\n[The story jumps forward. Describe what happens or the scene after this passage of time.]`; }
+            } else { currentText = modRes.text; }
+            
+            if (cleanedCommandForMatching.startsWith('/currentarcsettings') || cleanedCommandForMatching.startsWith('/saestop') || cleanedCommandForMatching === '/reinit_plugins' ) { finalStopSignal = true;
+            } else { finalStopSignal = false; } 
+        }
     }
 
-    if (isSystemMessageToIgnore) {
-        state.currentActionTypeForTimeAdvance = 'system_message_ignored';
-    } else if (commandWasHandledByModule) { 
-        state.currentActionTypeForTimeAdvance = 'system_command';
-    } else if (identifiedPlayerActionForSTT) {
-        state.currentActionTypeForTimeAdvance = identifiedPlayerActionForSTT;
+    if (isSystemMessageToIgnore) { state.currentActionTypeForTimeAdvance = 'system_message_ignored';
+    } else if (commandWasHandledByModule) { state.currentActionTypeForTimeAdvance = 'system_command';
+    } else if (identifiedPlayerActionForSTT) { state.currentActionTypeForTimeAdvance = identifiedPlayerActionForSTT;
     } else {
         const currentTurn = (typeof info !== 'undefined' && Number.isFinite(info.actionCount)) ? info.actionCount : -1;
-        if (currentTurn === 0 && (typeof info !== 'undefined' && info.actionType === 'start')) {
-             state.currentActionTypeForTimeAdvance = 'start';
-        } else if (rawInputForActionTypeCheck === "" && currentTurn > 0) { 
-            state.currentActionTypeForTimeAdvance = 'continue';
-        } else { 
-            state.currentActionTypeForTimeAdvance = 'continue'; 
-        }
+        if (currentTurn === 0 && (typeof info !== 'undefined' && info.actionType === 'start')) { state.currentActionTypeForTimeAdvance = 'start';
+        } else if (rawInputForActionTypeCheck === "" && currentTurn > 0) { state.currentActionTypeForTimeAdvance = 'continue';
+        } else { state.currentActionTypeForTimeAdvance = 'continue';  }
     }
     
-    if (typeof AutoCards === 'function' && !cleanedCommandForMatching.startsWith('/ac') && !cleanedCommandForMatching.startsWith('/acredo') ) { 
+    if (typeof AutoCards === 'function' && !commandWasHandledByModule) { 
         let acResult = AutoCards("input", originalTextForAC, finalStopSignal); 
-        if (!commandWasHandledByModule && !isSystemMessageToIgnore) { 
+        if (!isSystemMessageToIgnore) { 
             currentText = (typeof acResult === 'object' && acResult.text !== undefined) ? acResult.text : (Array.isArray(acResult) ? acResult[0] : currentText);
         }
         finalStopSignal = (typeof acResult === 'object' && acResult.stop !== undefined) ? acResult.stop : (Array.isArray(acResult) ? acResult[1] : finalStopSignal);
@@ -14837,28 +14419,20 @@ globalThis.onContext_Combined = function(text, stop) {
     let currentText = text;
     let currentStop = stop;
 
-    const sysRgx = /\n*\s*🔹🔹🔹🔹🔹\n?([\s\S]*?)\n?🔹🔹🔹🔹🔹\s*\n*/g;
+    const sysRgx = /\n*\s*\[SYSTEM-MSG-START\]\n?([\s\S]*?)\n?\[SYSTEM-MSG-END\]\s*\n*/g;
     currentText = (currentText || "").replace(sysRgx, (m, c) => `\n\n${c.trim()}\n\n`).replace(/\n{3,}/g, '\n\n').trim();
 
     if (STT.handleContext) currentText = STT.handleContext(currentText);
+    if (SAE.handleContext) currentText = SAE.handleContext(currentText);
 
-
-    if (typeof AutoCards === 'function') {
+    if (typeof AutoCards === 'function') { 
         let acResult = AutoCards("context", currentText, currentStop); 
-        if (Array.isArray(acResult) && acResult.length >= 2) {
-            currentText = acResult[0];
-            currentStop = acResult[1];
-        } else if (typeof acResult === 'object' && acResult !== null && acResult.text !== undefined && acResult.stop !== undefined) {
-            currentText = acResult.text; 
-            currentStop = acResult.stop;
-        } else {
-            // Fallback for AutoCards context
+        if (Array.isArray(acResult) && acResult.length >= 2) { currentText = acResult[0]; currentStop = acResult[1];
+        } else if (typeof acResult === 'object' && acResult !== null && acResult.text !== undefined && acResult.stop !== undefined) { currentText = acResult.text; currentStop = acResult.stop;
         }
-
         const isACG = (state.AutoCards?.generation?.workpiece && Object.keys(state.AutoCards.generation.workpiece).length > 0);
-                 {
-            currentStop = false;
-        }
+        const isSAEG = (state.sae?.isGenerating && state.sae.saveOutput);
+        if (isACG || isSAEG) { currentStop = false; }
     }
     return { text: currentText, stop: currentStop };
 };
@@ -14867,52 +14441,73 @@ globalThis.onOutput_Combined = function(text) {
     initializeCombinedModules(); 
     if(STT.advanceTimeBasedOnAction) STT.advanceTimeBasedOnAction();
 
-    let aiNarrativeOutput = text; let systemMessages = []; 
-    const isInputFromOurSystem = /🔹🔹🔹🔹🔹[\s\S]*?🔹🔹🔹🔹🔹/.test((text||"").trim());
+    let aiNarrativeOutput = text; let systemMessages = []; let saeSystemMessageGeneratedThisHook = null;
+    const isInputFromOurSystem = /\[SYSTEM-MSG-START\][\s\S]*?\[SYSTEM-MSG-END\]/.test((text||"").trim());
     const isACGActive = (state.AutoCards?.generation?.workpiece && Object.keys(state.AutoCards.generation.workpiece).length > 0);
-
+    const isSAEExpectingAIOutputAsArc = (state.sae?.isEnabled && state.sae.saveOutput);
     const currentTurnForOutputLog = typeof info !== 'undefined' && info.actionCount !== undefined ? info.actionCount : 'N/A';
 
-    if (isInputFromOurSystem && !isACGActive) {
+    if (isInputFromOurSystem && !isACGActive && !isSAEExpectingAIOutputAsArc) {
         if (typeof text === 'string' && text.trim()) systemMessages.push(text); aiNarrativeOutput = "";
     }
     else if (isACGActive) {
-        if (typeof AutoCards === 'function') {
+        if (typeof AutoCards === 'function') { 
             let acOutput = AutoCards("output", aiNarrativeOutput);
             if (typeof acOutput === 'string' && acOutput.trim()) {
-                if (/🔹🔹🔹🔹🔹|>>>|<<<|{>/.test(acOutput.trim())) { systemMessages.push(acOutput); aiNarrativeOutput = ""; }
+                if (/\[SYSTEM-MSG-START\]|>>>|<<<|{>/.test(acOutput.trim())) { systemMessages.push(acOutput); aiNarrativeOutput = ""; }
                 else { aiNarrativeOutput = acOutput; }
             } else { aiNarrativeOutput = ""; }
         }
     }
-
+    else if (isSAEExpectingAIOutputAsArc) {
+        if (SAE.handleOutput) { saeSystemMessageGeneratedThisHook = SAE.handleOutput(aiNarrativeOutput); if(saeSystemMessageGeneratedThisHook && typeof saeSystemMessageGeneratedThisHook === 'string') systemMessages.push(saeSystemMessageGeneratedThisHook); }
+        aiNarrativeOutput = ""; 
+    }
     else { 
         if (typeof AutoCards === 'function') { aiNarrativeOutput = AutoCards("output", aiNarrativeOutput); }
-
-
-
+        if (SAE.shouldTriggerGeneration) { 
+            const triggerResult = SAE.shouldTriggerGeneration();
+            if (triggerResult === "choose_type") {
+                saeSystemMessageGeneratedThisHook = formatSystemMessage( `✨ Set Story Arc Type! ✨ (Turn ${currentTurnForOutputLog})\n` + `Type: /setarctype [tone] / [intensity]\n\n` + `Tone Options: ${Object.keys(SAE.tonePrompts || {}).join(', ')}\n` + `(Current: '${state.sae?.arcTone || "null"}')\n\n` + `Intensity Options: ${Object.keys(SAE.intensityPrompts || {}).join(', ')}\n` + `(Current: '${state.sae?.arcIntensity || "null"}')\n\n` + `Example: /setarctype adventure / moderate` );
+                aiNarrativeOutput = ""; 
+            } else if (triggerResult === "generate_now") {
+                if (state.sae) {
+                    state.sae.isGenerating = true; state.sae.saveOutput = true; state.sae.attemptCounter = 0; state.sae.completionSuggested = false;
+                    state.sae.trigger_initial_arc_on_load = false; 
+                    saeSystemMessageGeneratedThisHook = formatSystemMessage(`📝 SAE preparing new plot (Tone: ${state.sae.arcTone}, Intensity: ${state.sae.arcIntensity}) for next turn! (Turn ${currentTurnForOutputLog})`);
+                }
+            }
+        }
+        if (saeSystemMessageGeneratedThisHook && typeof saeSystemMessageGeneratedThisHook === 'string') { systemMessages.push(saeSystemMessageGeneratedThisHook); }
+        if (typeof aiNarrativeOutput === 'string' && aiNarrativeOutput.trim()) {
+            const isNowSysMsg = /\[SYSTEM-MSG-START\]|\[SYSTEM:.*\]|>>>|<<<|{>|AFK/.test(aiNarrativeOutput.trim());
+            if (enableFormatter && Formatter.format && !isNowSysMsg) { const ctx = (typeof history !== 'undefined' && Array.isArray(history)) ? history.map(h => h.text || "").join('\n') : ''; aiNarrativeOutput = Formatter.format(aiNarrativeOutput, ctx); }
+        }
     }
 
     let outputParts = [];
     if (typeof aiNarrativeOutput === 'string' && aiNarrativeOutput.trim()) { outputParts.push(aiNarrativeOutput); }
     outputParts.push(...systemMessages.filter(p => typeof p === 'string' && p.trim()));
-    let combinedOutput = outputParts.map(p => { const sr = /\n*\s*🔹🔹🔹🔹🔹\n?([\s\S]*?)\n?🔹🔹🔹🔹🔹\s*\n*/g; return p.replace(sr, (m, c) => c.trim()); }).filter(p => p && p.trim() !== "").join("\n\n");
+    let combinedOutput = outputParts.map(p => { const sr = /\n*\s*\[SYSTEM-MSG-START\]\n?([\s\S]*?)\n?\[SYSTEM-MSG-END\]\s*\n*/g; return p.replace(sr, (m, c) => c.trim()); }).filter(p => p && p.trim() !== "").join("\n\n");
     combinedOutput = combinedOutput.replace(/\n{3,}/g, '\n\n').trim();
 
     if (STT.appendTimestampsToText) { combinedOutput = STT.appendTimestampsToText(combinedOutput); }
-
+    if (SAE.checkForCompletion && typeof aiNarrativeOutput === 'string' && aiNarrativeOutput.trim()) { SAE.checkForCompletion(aiNarrativeOutput); }
 
     if (combinedOutput && combinedOutput.trim() !== "") {
-        const isAnySystemOutput = /\[SYSTEM:.*\]|>>>|<<<|{>|AFK|Auto-Cards:|Time advanced|Time set|Date set|AI shy!|Empty AI response/.test(combinedOutput.trim());
+        const isAnySystemOutput = /\[SYSTEM:.*\]|>>>|<<<|{>|AFK|Auto-Cards:|SAE\💡|Time advanced|Time set|Date set|Current Settings:|Set Story Arc Type!|SAE preparing new plot|AI shy!|Empty AI response|Invalid arc|Not a full arc|New arc saved|🛑 Arc generation cancelled!|⚙️ SAE is off/.test(combinedOutput.trim());
         if (!isAnySystemOutput) { if (!combinedOutput.endsWith("\n\n")) { combinedOutput += combinedOutput.endsWith("\n") ? "\n" : "\n\n"; }
         } else { if (!combinedOutput.endsWith("\n")) { combinedOutput += "\n"; } }
     }
-
     if(state.toastQueue?.length>0){ const tM=state.toastQueue.join('\n'); if(state.message&&typeof state.message==='string'&&!state.message.includes(tM.split('\n')[0])){ state.message+='\n'+tM; } else if(!state.message){ state.message=tM; } state.toastQueue=[]; }
     return{text:combinedOutput};
 };
 
 })(); // End of IIFE wrapper
+
+
+
+/////added last
 function ParagraphFix(hook, inputText) {
     "use strict";
     
@@ -15205,6 +14800,13 @@ function ParagraphFix(hook, inputText) {
 
 if (!state.globalTime) {
   state.globalTime = { year: 1454, month: 3, day: 27, hour: 7, minute: 0 };
+}
+if (!state.turnsPerElemRemoval){state.turnsPerElemRemoval = 5;}
+
+if (!state.turnNum_SAE) {
+    state.turnNum_SAE = state.turnCount + 1; // first time initialization
+} else {
+    state.turnNum_SAE = state.turnCount + 1; // sync with current global turn
 }
 
 if (!state.worldClock) {
@@ -15725,3 +15327,60 @@ function storeWCToSC() {
     `TST: ${state.stt.timePassOnStory}\n`+
     `TC: ${state.stt.timePassOnContinue} \n`;
 }
+
+
+
+//added sae element removal syand alone
+
+
+function itemRemoval() {
+    // Find the "Current Story Arc" card
+    const arcSC = storyCards.find(sc => sc.title === "Current Story Arc");
+     
+    if (!arcSC || !arcSC.entry || arcSC.entry.trim() === "") return; // Do nothing if empty
+
+    // Split entry into lines
+    const lines = arcSC.entry.split('\n');
+
+    // Find the start of the numbered list
+    const startIndex = lines.findIndex(line => /^\d+\.\s/.test(line));
+    if (startIndex === -1) return; // No numbered list found
+
+    // Separate text before the list and the list itself
+    const beforeList = lines.slice(0, startIndex);
+    const listLines = lines.slice(startIndex);
+
+    //mark and log item removal
+      const removedItem = listLines[0];
+    // Prepend removed item to description
+arcSC.description = `Log ${state.turnNum_SAE} | Previously:\n${removedItem}\n` + (arcSC.description || "");
+
+// Trim description to max 3000 characters
+if (arcSC.description.length > 3000) {
+    arcSC.description = arcSC.description.slice(0, 3000);
+}
+
+    // Remove the first item
+    listLines.shift();
+
+    // Renumber remaining items
+    const renumberedList = listLines.map((line, idx) => {
+        return `${idx + 1}. ${line.replace(/^\d+\.\s*/, '')}`;
+    });
+
+    // Reassemble entry and save back
+    arcSC.entry = [...beforeList, ...renumberedList].join('\n');
+}
+
+function arcElementRemoval() {
+    if (
+        state.turnNum_SAE >= 5 &&
+        state.turnNum_SAE % state.turnsPerElemRemoval === 0 &&
+        state.turnsPerElemRemoval !== 0
+    ) {
+        // Call the standalone element removal function
+        itemRemoval();
+        log("\narcElementRemoval ran.")
+    }
+}
+
