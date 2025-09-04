@@ -15601,15 +15601,20 @@ const SAE = {
           const pts = text.split('\n').map(l => l.trim()).filter(ln => /^\d+\.\s/.test(ln));
          
 
-          // --- NEW: Reset pointer if the arc is shortened ---
-    if (state.saePrevLength === undefined) state.saePrevLength = 0;
-    if (state.sae && state.sae.storyArc) {
-        if (pts.length < state.saePrevLength) {
-            state.sae.activePointIndex = 0; // reset pointer
-        }
+// --- NEW: Reset pointer if the saved arc got shorter ---
+if (state.saePrevLength === undefined) state.saePrevLength = 0;
+if (this.acAPI) {
+    const arcCard = this.acAPI.getCard(c => c && c.title === "Current Story Arc");
+    const savedPts = arcCard?.entry?.split('\n').map(l => l.trim()).filter(ln => /^\d+\.\s/.test(ln)) || [];
+    if (state.sae && state.sae.storyArc && savedPts.length < state.saePrevLength) {
+        state.sae.activePointIndex = 0; // reset pointer
     }
-    state.saePrevLength = pts.length; // update previous length
-
+    state.saePrevLength = savedPts.length; // update previous length
+} // update previous length
+// --- Log current active point index ---
+if (state.sae) {
+    log(`SAE Active Point Index: ${state.sae.activePointIndex}`);
+}
 
            if (pts.length < 8) 
           { state.sae.attemptCounter++;
