@@ -12283,26 +12283,32 @@ function detectConsuming(text) {
         if (powerfulHeal) {
           statUp(plr, "hp", 100);
           statUp(plr, "ep", 120);
+          statUp(plr, "mp", 120);
           consumeFlavorText = toCoOpLang(plr, " You feel restored.");
         } else if (greatHeal) {
           statUp(plr, "hp", 50);
           statUp(plr, "ep", 80);
+          statUp(plr, "mp", 80);
           consumeFlavorText = toCoOpLang(plr, " You feel greatly better.");
         } else if (strongHeal) {
           statUp(plr, "hp", 30);
           statUp(plr, "ep", 40);
+          statUp(plr, "mp", 40);
           consumeFlavorText = toCoOpLang(plr, " You feel a lot better.");
         } else if (moderateHeal) {
           statUp(plr, "hp", 20);
           statUp(plr, "ep", 30);
+          statUp(plr, "mp", 30);
           consumeFlavorText = toCoOpLang(plr, " You feel moderately better.");
         } else if (lightHeal) {
           statUp(plr, "hp", 10);
           statUp(plr, "ep", 10);
+          statUp(plr, "mp", 10);
           consumeFlavorText = toCoOpLang(plr, " You feel slightly better.");
         } else {
           statUp(plr, "hp", 5);
           statUp(plr, "ep", 5);
+          statUp(plr, "mp", 5);
           consumeFlavorText = toCoOpLang(plr, " You feel a bit better.");
         }
 
