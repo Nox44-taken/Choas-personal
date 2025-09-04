@@ -15611,10 +15611,8 @@ if (this.acAPI) {
     }
     state.saePrevLength = savedPts.length; // update previous length
 } // update previous length
-// --- Log current active point index ---
-if (state.sae) {
-    log(`SAE Active Point Index: ${state.sae.activePointIndex}`);
-}
+
+
 
            if (pts.length < 8) 
           { state.sae.attemptCounter++;
