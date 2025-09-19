@@ -168,20 +168,24 @@ const calmingWords = ["calm", "rest", "relax", "meditate", "sleep", "comfort", "
 const modifier = (text) => {
   // First process AutoCards
 
-  const card = Epoch.initializeTimeState();
-    text = Epoch.advanceTurn(text, state, card); 
+
+
     
    
   text = onOutput_TAS(text);
-  
+
+ 
 
   const result = onOutput_Combined(text);
 
 text = ParagraphFix("output", text);
+
+
 //store time as stt script then retrive mapped to worldclock script
  storeSTTToSC();
 
 arcElementRemoval();
+
 
 
  retrieveWCFromSC();
@@ -262,47 +266,12 @@ arcElementRemoval();
 state.heatlogs = heatlogs;
  // store as worldclock script then retreive as global clock and make changes for output
 
- // === Reputation Tracking ===
-
- 
-  const worldDelta = state.lastWorldReputationChange || {};
-  const personalDelta = state.lastPersonalReputationChange || {};
-  const rep = state.reputation || {};
-  let changes = [];
-
-  // --- Reputation Change Displays
-  const worldChanged = Object.keys(worldDelta).length > 0;
-  const personalChanged = Object.keys(personalDelta).length > 0;
-
-  if (typeof output !== "undefined") output.push("[DEBUG] worldDelta: " + JSON.stringify(worldDelta));
-  if (typeof output !== "undefined") output.push("[DEBUG] personalDelta: " + JSON.stringify(personalDelta));
-  if (typeof output !== "undefined") output.push("[DEBUG] reputation: " + JSON.stringify(rep));
-
-  if (worldChanged) {
-    const worldChanges = Object.entries(worldDelta)
-      .map(([faction, delta]) => `${faction} ${delta >= 0 ? "+" : ""}${delta}`)
-      .join("  ");
-    changes.push(`[World Reputation Change] ${worldChanges}`);
-    changes.push(`[World Reputation] ${getReputationSummary(state)}`);
-    if (typeof output !== "undefined") output.push("[DEBUG] Pushed world rep changes.");
-  }
-
-  if (personalChanged) {
-    const personalChanges = Object.entries(personalDelta)
-      .map(([cat, delta]) => `${cat} ${delta >= 0 ? "+" : ""}${delta}`)
-      .join("  ");
-    const personalSummary = ` Charmer:${rep.Charmer || 0} Honorable:${rep.Honorable || 0} Rogue:${rep.Rogue || 0} Dominant:${rep.Dominant || 0} Submissive:${rep.Submissive || 0} Prankster:${rep.Prankster || 0} Curious:${rep.Curious || 0} Innocent:${rep.Innocent || 0} Mischievous:${rep.Mischievous || 0} Affectionate:${rep.Affectionate || 0} Defiant:${rep.Defiant || 0} Brave:${rep.Brave || 0} Clever:${rep.Clever || 0} Playful:${rep.Playful || 0}`;
-    changes.push(`[Personal Reputation Change] ${personalChanges}`);
-    changes.push(personalSummary);
-  }
 
 
 
 
 
-  // --- Clear rep deltas ---
-  state.lastWorldReputationChange = {};
-  state.lastPersonalReputationChange = {};
+
 
   // --- Final output, stacking all pieces in order ---
  let tmday = checkTimeOfDay();
@@ -315,18 +284,20 @@ state.heatlogs = heatlogs;
     if (typeof state !== "undefined" && state.lastActionMinutes !== undefined) {
       minutesInfo = ` (Action took ${state.lastActionMinutes} minute${state.lastActionMinutes !== 1 ? "s" : ""})`;
     }
-    if (clockString) statusBar = `[🕒 ${clockString}]${minutesInfo}\n`;
+    if (clockString) statusBar = `[🕒 ${clockString}]${minutesInfo}`;
   }
 state.statusBar = statusBar;
   // --- Final output, stacking all pieces in order ---
   let outText = result.text;
-  if (changes.length > 0) outText = [outText, ...changes].join("\n\n");
- 
+
+
+  storePromptToSC();
 storeWCToSC();
 
 retrieveCurrFromSC();
 
  storeCurrToSC();
+ log(`SAE Active Point Index 3: ${state.sae.activePointIndex}`);
 
  // Return everything in separate lines
 let finalText = [tmday, outText].filter(Boolean).join("\n");
