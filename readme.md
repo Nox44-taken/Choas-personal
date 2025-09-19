@@ -27,22 +27,22 @@ Personal changes added
 - added a story status card to allow user to see and affect the following parameters
 
                     story status
-[World Clock: [🕒 Year 100, 02-15 06:11] (Action took 1 minute)- for display only to show action based input script effect
-Current turn: 430 - also for display only to know how close you are to triggering SAE
-Year: 100 - can be adjusted and will affect global time
-Month-Day: 02-15 - can be adjusted and will affect global time
-Hour-Minute: 06:11 - can be adjusted and will affect global time
-Turns Per Removal: 50 - can be adjusted and will affect SAE element removal from current story arc
-Current Heat: -150 - can be adjusted and will affect guidance overhaul script
-Current Temperature: 1 - can be adjusted and will affect guidance over haul script
-AI: 0 - ignore this, rather dont touch it. it has fail safes after element removal but still testing if it affects the script 
-Authors Note: Story Phase: Introduction. Introduce characters and locations. There should be no conflict or tension in the story. use 2nd/3rd person writing as user intends. always show that men are extremely rare and valuable, no animal folk or demi human has an actual animal head or whiskers, all demi humans and animal folk hide their claws when not needed
-TD: 5 can be adjusted and will affect how many minutes pass when you select do
-TS: 1 can be adjusted and will affect how many minutes pass when you select say
-TST: 5 can be adjusted and will affect how many minutes pass when you select story
-TC: 5 can be adjusted and will affect how many minutes pass when you select continue
-turn: 430 ignore this for display only
-]
+        [World Clock: [🕒 Year 100, 02-15 06:11] (Action took 1 minute)- for display only to show action based input script effect
+          Current turn: 430 - also for display only to know how close you are to triggering SAE
+            Year: 100 - can be adjusted and will affect global time
+            Month-Day: 02-15 - can be adjusted and will affect global time
+              Hour-Minute: 06:11 - can be adjusted and will affect global time
+          Turns Per Removal: 50 - can be adjusted and will affect SAE element removal from current story arc
+          Current Heat: -150 - can be adjusted and will affect guidance overhaul script
+        Current Temperature: 1 - can be adjusted and will affect guidance over haul script
+      AI: 0 - ignore this, rather dont touch it. it has fail safes after element removal but still testing if it affects the script 
+      Authors Note: Story Phase: Introduction. Introduce characters and locations. There should be no conflict or tension in the story. use 2nd/3rd person writing as user intends. always show that men are extremely rare and valuable, no animal folk or demi human has an actual animal head or whiskers, all demi humans and animal folk hide their claws when not needed
+        TD: 5 can be adjusted and will affect how many minutes pass when you select do
+        TS: 1 can be adjusted and will affect how many minutes pass when you select say
+        TST: 5 can be adjusted and will affect how many minutes pass when you select story
+        TC: 5 can be adjusted and will affect how many minutes pass when you select continue
+        turn: 430 ignore this for display only
+      ]
 
 - added a prompt debug card well its original purpose was fixed so it just shows current time. change its triggers if you want so that it can appear in your story
 - made TAS compatible with 3rd person perspective, check under (youwords) feel free to add your character name i have mine as Nox
