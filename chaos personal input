@@ -1,6 +1,6 @@
 
 /* === STORY ARC CONFIGURATION === */
-state.originalAuthorsNote = "include events that the player is not aware of. this is a fantasy setting" //Add your story's authors note here. This will allow the system to modify the authors note whiile preserving your current one. If you have a dynamically changing authors note, you can instead put a "state.variableName" here.
+state.originalAuthorsNote = "use 2nd/3rd person writing as user intends. always show that men are extremely rare and valuable, no animal folk or demi human has an actual animal head or whiskers, all demi humans and animal folk hide their claws when not needed" //Add your story's authors note here. This will allow the system to modify the authors note whiile preserving your current one. If you have a dynamically changing authors note, you can instead put a "state.variableName" here.
 
 state.initialHeatValue = 0 //Increasing this will increase the chance of the temperature increasing in the first few moments of the story.
 state.initialTemperatureValue = 1 //Increasing this will increase the amount of conflict and tension in the initial sections of the story.
@@ -87,6 +87,7 @@ const modifier = (text) => {
   // First process AutoCards if needed
  
   text = onInput_TAS(text);
+    text = LocalizedLanguages("input", text);
 
 const result = onInput_Combined(text);
 //store time as stt script then retrive mapped to worldclock script
@@ -444,42 +445,7 @@ retrieveCurrFromSC();
   if (!state.worldClock) state.worldClock = { year: 1454, month: 3, day: 27, hour: 7, minute: 0 };
   if (!state.pendingMinutes) state.pendingMinutes = 0;
 
-  // === Initialize World and Personal Reputation ===
-  initWorldReputation(state);
-  initPersonalReputation(state);
-
-  // === DEBUG: Rep State on Init ===
-  if (typeof output !== "undefined") output.push("[DEBUG] Rep after init: " + JSON.stringify(state.reputation));
-
-  // === Snapshot Before Changes ===
-  const oldWorldRep = { ...state.factions };
-  const oldPersonalRep = { ...state.reputation };
-
-  // === Personal Reputation Parsing ===
-const patterns = getPersonalReputationPatterns();
-for (const pattern of patterns) {
-  if (pattern.regex.test(text)) {
-    for (const cat in pattern.changes) {
-      const oldValue = state.reputation[cat] || 0;
-      const delta = pattern.changes[cat];
-
-      const minRep = -100;
-      const maxRep = 100;
-
-      let newValue = oldValue + delta;
-      newValue = Math.max(minRep, Math.min(maxRep, newValue));
-
-      state.reputation[cat] = newValue;
-    }
-    logPersonalRepChange(text, pattern.changes);
-  }
-}
-
-
-
-  // === Reputation Delta Tracking ===
-  state.lastWorldReputationChange = trackReputationChanges(oldWorldRep, state.factions);
-  state.lastPersonalReputationChange = trackReputationChanges(oldPersonalRep, state.reputation);
+  
 
 
   // === Log interaction (for triggers/titles later)
@@ -516,21 +482,7 @@ ${requestText}
   return { input: text, variables };
 }
 
-// === Helper: Rep Change Logger ===
-function logPersonalRepChange(text, changes) {
-  if (!state.reputationLog) state.reputationLog = [];
 
-  const summary = Object.entries(changes)
-    .map(([trait, val]) => `${trait} ${val >= 0 ? "+" : ""}${val}`)
-    .join(", ");
-
-  state.reputationLog.push({
-    timestamp: Date.now(),
-    action: text.slice(0, 100),
-    effect: changes,
-    summary,
-  });
-}
 
 
 
