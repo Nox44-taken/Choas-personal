@@ -22,8 +22,15 @@ https://github.com/Eliterose19/Paragraph-Fix/
 search under script library thread in ai dungeon discord 
 
 the basic functioning of all those scripts hasn't changed only made tweaks to help them work together
+
+
+
 Personal changes added
+
+
 -adjusted AC to always display its messages since usually it only displays when the last popup messasge is unchanged, but TAS outputs messages per turn
+
+
 - added a story status card to allow user to see and affect the following parameters
 
                     story status
