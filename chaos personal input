@@ -1,6 +1,6 @@
 
 /* === STORY ARC CONFIGURATION === */
-state.originalAuthorsNote = "use 2nd/3rd person writing as user intends. always show that men are extremely rare and valuable, no animal folk or demi human has an actual animal head or whiskers, all demi humans and animal folk hide their claws when not needed" //Add your story's authors note here. This will allow the system to modify the authors note whiile preserving your current one. If you have a dynamically changing authors note, you can instead put a "state.variableName" here.
+state.originalAuthorsNote =  state.newNote//Add your story's authors note here. This will allow the system to modify the authors note whiile preserving your current one. If you have a dynamically changing authors note, you can instead put a "state.variableName" here.
 
 state.initialHeatValue = 0 //Increasing this will increase the chance of the temperature increasing in the first few moments of the story.
 state.initialTemperatureValue = 1 //Increasing this will increase the amount of conflict and tension in the initial sections of the story.
