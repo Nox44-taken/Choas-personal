@@ -142,7 +142,7 @@ globalThis.MainSettings = (class MainSettings {
         ,
         // Titles banned from future card generation attempts?
         DEFAULT_BANNED_TITLES_LIST: (
-            "North, East, South, West, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, January, February, March, April, May, June, July, August, September, October, November, December, New Story Arc, Generate Story Arc, Redo Story Arc, It, Him, Her, She, His, Hers, Theirs, Both, Them, They, All, Ours, Our, We're, They're, And, But, When, Why, Who, What, Us, We, Story Arc Engine, Scales, Set Story Arc Type, Type, NEW, TIME, Intensity, Story Arc Settings, Story Arc, Updating Story Arc Next Turn, Charmer, Honorable, Rogue, Dominant, Submissive, Prankster, Curious, Innocent, Mischievous, Affectionate, Defiant, Brave, Clever, Playful, Month, Year, Day, Minute,  Not, Spread, Eastern, Western, Northern, Southern"
+            "North, East, South, West, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, January, February, March, April, May, June, July, August, September, October, November, December, New Story Arc, Generate Story Arc, Redo Story Arc, It, Him, Her, She, His, Hers, Theirs, Both, Them, They, All, Ours, Our, We're, They're, And, But, When, Why, Who, What, Us, We, Story Arc Engine, Scales, Set Story Arc Type, Type, NEW, TIME, Intensity, Story Arc Settings, Story Arc, Updating Story Arc Next Turn, Charmer, Honorable, Rogue, Dominant, Submissive, Prankster, Curious, Innocent, Mischievous, Affectionate, Defiant, Brave, Clever, Playful, Month, Year, Day, Minute,  Not, Spread, Eastern, Western, Northern, Southern, Invalid"
         ) // (mimic this comma-list "text" format)
         ,
         // Default story card "type" used by Auto-Cards? (does not matter)
@@ -24021,7 +24021,7 @@ function AutoCards(inHook, inText, inStop) {
     ,
     // Titles banned from future card generation attempts?
     DEFAULT_BANNED_TITLES_LIST: (
-        "North, East, South, West, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, January, February, March, April, May, June, July, August, September, October, November, December, New Story Arc, Generate Story Arc, Redo Story Arc, It, Him, Her, She, His, Hers, Theirs, Both, Them, They, All, Ours, Our, We're, They're, And, But, When, Why, Who, What, Us, We, Story Arc Engine, Scales, Set Story Arc Type, Type, NEW, TIME, Intensity, Story Arc Settings, Story Arc, Updating Story Arc Next Turn, Charmer, Honorable, Rogue, Dominant, Submissive, Prankster, Curious, Innocent, Mischievous, Affectionate, Defiant, Brave, Clever, Playful, Month, Year, Day, Minute,  Not, Spread, Eastern, Western, Northern, Southern"
+        "North, East, South, West, Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, January, February, March, April, May, June, July, August, September, October, November, December, New Story Arc, Generate Story Arc, Redo Story Arc, It, Him, Her, She, His, Hers, Theirs, Both, Them, They, All, Ours, Our, We're, They're, And, But, When, Why, Who, What, Us, We, Story Arc Engine, Scales, Set Story Arc Type, Type, NEW, TIME, Intensity, Story Arc Settings, Story Arc, Updating Story Arc Next Turn, Charmer, Honorable, Rogue, Dominant, Submissive, Prankster, Curious, Innocent, Mischievous, Affectionate, Defiant, Brave, Clever, Playful, Month, Year, Day, Minute,  Not, Spread, Eastern, Western, Northern, Southern, Invalid"
     ) // (mimic this comma-list "text" format)
     ,
     // Default story card "type" used by Auto-Cards? (does not matter)
@@ -28638,7 +28638,7 @@ function AutoCards(inHook, inText, inStop) {
             return uniqueTitlesArray(S.DEFAULT_BANNED_TITLES_LIST.split(","));
         } else {
             return [
-                "North", "East", "South", "West", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "New Story Arc", "Generate Story Arc", "Redo Story Arc", "It", "Him", "Her", "She", "His", "Hers", "Theirs", "Both", "Them", "They", "All", "Ours", "Our", "We're", "They're", "And", "But", "When", "Why", "Who", "What", "Us", "We", "Story Arc Engine", "Scales", "Set Story Arc Type", "Type", "NEW", "TIME", "Intensity", "Story Arc Settings", "Story Arc", "Updating Story Arc Next Turn", "Charmer", "Honorable", "Rogue", "Dominant", "Submissive", "Prankster", "Curious", "Innocent", "Mischievous", "Affectionate", "Defiant", "Brave", "Clever", "Playful", "Month", "Year", "Day", "Minute",  "Not", "Spread", "Eastern", "Western", "Northern", "Southern",
+                "North", "East", "South", "West", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "New Story Arc", "Generate Story Arc", "Redo Story Arc", "It", "Him", "Her", "She", "His", "Hers", "Theirs", "Both", "Them", "They", "All", "Ours", "Our", "We're", "They're", "And", "But", "When", "Why", "Who", "What", "Us", "We", "Story Arc Engine", "Scales", "Set Story Arc Type", "Type", "NEW", "TIME", "Intensity", "Story Arc Settings", "Story Arc", "Updating Story Arc Next Turn", "Charmer", "Honorable", "Rogue", "Dominant", "Submissive", "Prankster", "Curious", "Innocent", "Mischievous", "Affectionate", "Defiant", "Brave", "Clever", "Playful", "Month", "Year", "Day", "Minute",  "Not", "Spread", "Eastern", "Western", "Northern", "Southern","Invalid", 
             ];
         }
     }
@@ -30035,6 +30035,8 @@ function onInput_TAS(text) {
 
     createIfNoCurrSC();
     createIfNoPromptSC();
+    createIfNoANSC();
+
     text = detectStorageCallActions(text);
 
     text = detectStoreInv(text);
@@ -30115,6 +30117,7 @@ function onOutput_TAS(text) {
 
     createIfNoCurrSC();
     createIfNoPromptSC();
+    createIfNoANSC();
    
 
     // Output functions
@@ -39620,7 +39623,8 @@ function ParagraphFix(hook, inputText) {
 if (!state.globalTime) {
   state.globalTime = { year: 1454, month: 3, day: 27, hour: 7, minute: 0 };
 }
-if (!state.turnsPerElemRemoval){state.turnsPerElemRemoval = 5;}
+if (!state.turnsPerElemRemoval){state.turnsPerElemRemoval = 50;}
+if (!state.newNote){state.newNote = "";}
 
 if (!state.turnNum_SAE) {
     state.turnNum_SAE = state.turnCount + 1; // first time initialization
@@ -40266,7 +40270,32 @@ state.message =
 
 }
 
+// added ANuthors note
+function createIfNoANSC(){
+    formatForSC = [];
+  if (!storyCards.find(sc => sc.title === "New Auth Note")) {
+    // If "Story Status" card doesn't exist, create it
+    addStoryCard("New Auth Note", "Blank", "New Auth Note");
+
+    // Fetch the "Story Status" card
+    const authNoteSC = storyCards.find(sc => sc.title === "New Auth Note");
+     
+// Convert holder to string, clean commas, and finally store to sc entry
+  authNoteSC.entry = String(formatForSC).replace(/,/g, '');
+  authNoteSC.description = String(formatForSC).replace(/,/g, '');
+  };
+  }
+  
+function retrieveANFromSC() {
+  const authNoteSC = storyCards.find(sc => sc.title === "New Auth Note");
+  if (!authNoteSC || !authNoteSC.entry) return "";
+
+  return authNoteSC.entry; // return the entry directly
+}
+
+// then wherever you want to update state.newNote:
+state.newNote = retrieveANFromSC()
+
 
    
-
 
