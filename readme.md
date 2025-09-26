@@ -71,6 +71,8 @@ Personal changes added
         turn: 430 ignore this for display only
       ]
 
+  - added am card called New Auth Note that allows works like the generic authors note since the multiple scripts affect the generic plot component. After changing it, just make any input (do/say/story) to trigger its addition to AN
+
 - added a prompt debug card well its original purpose was fixed so it just shows current time. change its triggers if you want so that it can appear in your story
 - made TAS compatible with 3rd person perspective, check under (youwords) feel free to add your character name i have mine as Nox
 - also added healing of ep and mana to basic healing mechanisms
