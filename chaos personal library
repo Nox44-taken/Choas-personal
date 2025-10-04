@@ -55,7 +55,7 @@ globalThis.MainSettings = (class MainSettings {
         // (true or false)
         ,
         // Minimum number of turns in between automatic card generation events?
-        DEFAULT_CARD_CREATION_COOLDOWN: 40
+        DEFAULT_CARD_CREATION_COOLDOWN: 9999
         // (0 to 9999)
         ,
         // Use a bulleted list format for newly generated card entries?
@@ -63,7 +63,7 @@ globalThis.MainSettings = (class MainSettings {
         // (true or false)
         ,
         // Maximum allowed length for newly generated story card entries?
-        DEFAULT_GENERATED_ENTRY_LIMIT: 600
+        DEFAULT_GENERATED_ENTRY_LIMIT: 300
         // (200 to 2000)
         ,
         // Do newly generated cards have memory updates enabled by default?
@@ -23934,7 +23934,7 @@ function AutoCards(inHook, inText, inStop) {
     // (true or false)
     ,
     // Minimum number of turns in between automatic card generation events?
-    DEFAULT_CARD_CREATION_COOLDOWN: 40
+    DEFAULT_CARD_CREATION_COOLDOWN: 9999
     // (0 to 9999)
     ,
     // Use a bulleted list format for newly generated card entries?
@@ -23942,7 +23942,7 @@ function AutoCards(inHook, inText, inStop) {
     // (true or false)
     ,
     // Maximum allowed length for newly generated story card entries?
-    DEFAULT_GENERATED_ENTRY_LIMIT: 600
+    DEFAULT_GENERATED_ENTRY_LIMIT: 300
     // (200 to 2000)
     ,
     // Do newly generated cards have memory updates enabled by default?
@@ -29944,6 +29944,7 @@ function AutoCards(inHook, inText, inStop) {
 // LewdLeah - General Scripting Knowledge
 //
 
+
 // This function runs the library hook
 onLibrary_TAS();
 
@@ -30148,7 +30149,7 @@ function onOutput_TAS(text) {
 
 youWords = ["you", "You", "I", "nox", "Nox"];
 
-selfWords = ["me", "my", "myself", "mine", "your", "yourself", "yours", "us", "our", "ours", "ourselves", "himself"
+selfWords = ["me", "my", "myself", "mine", "your", "yourself", "yours", "us", "our", "ours", "ourselves", "himself", "his",
 ];
 
 castWords = [
@@ -35201,6 +35202,7 @@ function createClassSkills(plr, numOfSkills, wipeOldSkills) {
       state.players[plr].skills.name = [];
       state.players[plr].skills.lvl = [];
       state.players[plr].skills.cost = [];
+      state.players[plr].skills.keys =[];
     }
 
     // Make starting skills
@@ -35218,6 +35220,8 @@ function createClassSkills(plr, numOfSkills, wipeOldSkills) {
       state.players[plr].skills.name.push(createdSkill);
       state.players[plr].skills.lvl.push(randomInt(0, 9));
       state.players[plr].skills.cost.push(randomInt(10, 40));
+      state.players[plr].skills.keys.push("");
+
     }
   }
 
@@ -35241,7 +35245,7 @@ function createIfNoSkillSC() {
 
       // Fetch SC and give it a description
       const skillSC = storyCards.find(sc => sc.title === `${plr} Skills`)
-      skillSC.description = "Format for Modifying: SkillName (LVL) (MP), etc.";
+      skillSC.description = "Format for Modifying: SkillName (LVL) (MP) (Optional triggers: key 1, key 2), etc.";
 
       // Get player class and create the skills they start with
       createClassSkills(plr, 3, true);
@@ -35260,8 +35264,7 @@ function storeSkillsToSC() {
     const skillSC = storyCards.find(sc => sc.title === `${plr} Skills`)
 
     // Format and display to sc Ex: Fireball (20 MP)
-    skillSC.entry = state.players[plr].skills.name.map((skill, index) => `${skill} (Lvl ${state.players[plr].skills.lvl[index]}) (${state.players[plr].skills.cost[index]} MP)`).join("\n");
-
+    skillSC.entry = state.players[plr].skills.name.map((skill, index) => `${skill} (Lvl ${state.players[plr].skills.lvl[index]}) (${state.players[plr].skills.cost[index]} MP) (Keys: ${state.players[plr].skills.keys[index]})`).join("\n");
     // Trim notes on char limit to prevent memory overfill
     if (skillSC.description.length > 3000) {
       halfIndex = Math.floor(skillSC.description.length / 3);
@@ -35285,8 +35288,9 @@ function retrieveSkillsFromSC() {
     skillHolder = [];
     lvlHolder = [];
     costHolder = [];
+    keysHolder = [];
     // Extract skill name and MP cost using regex. Discard wrong formats
-    let matches = temp.matchAll(/(.+?)\s*\(.*?(\d+(?:\.\d+)?).*?\)\s*\(.*?(\d+(?:\.\d+)?).*?\)/g);
+    let matches = temp.matchAll(/(.+?)\s*\(.*?(\d+(?:\.\d+)?).*?\)\s*\(.*?(\d+(?:\.\d+)?).*?\)(?:\s*\(\s*(?:Keys:\s*)?([^)]+?)\s*\))?/g);
 
     // Store in respective arrays holders
     for (const match of matches) {
@@ -35295,17 +35299,26 @@ function retrieveSkillsFromSC() {
       // Second capture group (skill lvl)
       lvlHolder.push(Number(match[2]));
       // Third (skill cost)
-      costHolder.push(Number(match[3]))
+      costHolder.push(Number(match[3]));
+      // Fourth, skill keys
+      if (match[4]) {
+        keysHolder.push(match[4].trim() ?? "");
+      }
+      else {
+        keysHolder.push(match[4] ?? "");
+      }
     }
 
     //Final store to code base
     state.players[plr].skills.name = skillHolder;
     state.players[plr].skills.lvl = lvlHolder;
     state.players[plr].skills.cost = costHolder;
+    state.players[plr].skills.keys = keysHolder;
 
     //log("state.players[plr].skills.name: " + state.players[plr].skills.name);
     //log("state.players[plr].skills.lvl: " + state.players[plr].skills.lvl);
     //log("state.players[plr].skills.cost: " + state.players[plr].skills.cost);
+    //log("state.players[plr].skills.keys : " + state.players[plr].skills.keys);
   });
 }
 
@@ -35418,6 +35431,8 @@ function rewardSkillForLevelUp(text) {
 /////////////////////////////////////////////////////////////////////////////////////
 
 // Converts talents that are casted into a skill by detecting if closest action word of talent is a cast word
+
+// Converts talents that are casted into a skill by detecting if closest action word of talent is a cast word
 function talentCastedToSkill(plr, wordsArr, talentIndex, actionWordIndices) {
   // Ensure talent exists in case player turns same talent to skill multiple times
   if (state.players[plr].talents.name[talentIndex]) {
@@ -35510,7 +35525,7 @@ function executeTalent(plr, fullTalentFlag, index) {
     oldTalentLvl = state.players[plr].talents.lvl[index];
 
     // Using talents grants talent exp
-    talentExp = randomFloat(0, 0.8);
+    talentExp = randomFloat(1, 5);
     log("talentExp: " + talentExp);
 
     // Increase the talent's level by the generated experience
@@ -35588,7 +35603,7 @@ function executeskill(plr, fullSkillFlag, index) {
   oldSkillLvl = state.players[plr].skills.lvl[index];
 
   // Using skills grants skill exp
-  skillExp = randomFloat(0, 0.8);
+  skillExp = randomFloat(1, 5);
   log("skillExp: " + skillExp);
 
   // Increase the skill's level by the generated experience
@@ -35751,8 +35766,21 @@ function detectStorageCallActions(text) {
       });
       log('allTalentKeys: ' + allTalentKeys);
 
+      // Get skill keys to store as action words
+      allSkillKeys = [];
+      state.players[plr].skills.keys.forEach((keys, index) => {
+        if (keys.length > 2) {
+          keys = keys.split(",");
+          keys.forEach(key => {
+            allSkillKeys.push(key.trim().toLowerCase());
+          });
+        }
+      });
+      log('allSkillKeys: ' + allSkillKeys);
+
+
       // Check input for action words and split the input
-      allActionWords = [...castWords, ...talentWords, ...healingWords, ...allTalentKeys];
+      allActionWords = [...castWords, ...talentWords, ...healingWords, ...allTalentKeys, ...allSkillKeys];
       actionTextInput = findTargetsThenSplit(plrText[plr], allActionWords, true);
       log("actionTextInput simplified: " + actionTextInput);
 
@@ -35770,6 +35798,9 @@ function detectStorageCallActions(text) {
         cumulText = (actionTextInput.length > 0) ? actionTextInput.join(" ") : cumulText;
 
         actionTextInput = findTargetsThenSplit(cumulText, allTalentKeys, true);
+        cumulText = (actionTextInput.length > 0) ? actionTextInput.join(" ") : cumulText;
+
+        actionTextInput = findTargetsThenSplit(cumulText, allSkillKeys, true);
         cumulText = (actionTextInput.length > 0) ? actionTextInput.join(" ") : cumulText;
 
         actionTextInput = cumulText.trim().split(" ");
@@ -35870,6 +35901,15 @@ function detectStorageCallActions(text) {
           state.players[plr].talents.keys.forEach((keys, index) => {
             if (keys.includes(actionTextInput[i])) {
               plrThings.types.push(1);
+              plrThings.indices.push(index);
+              plrThings.fullMatchFlags.push(true);
+            }
+          });
+
+          // If any skill keys are matched, push respective skill thing
+          state.players[plr].skills.keys.forEach((keys, index) => {
+            if (keys.includes(actionTextInput[i])) {
+              plrThings.types.push(2);
               plrThings.indices.push(index);
               plrThings.fullMatchFlags.push(true);
             }
@@ -36059,6 +36099,7 @@ function detectStorageCallActions(text) {
               if (type == 1) {
                 actionFlavorText = actionFlavorText + executeTalent(plr, true, index);
                 talentCastedToSkill(plr, actionTextInput, index, allActionWordIndices);
+ 
               }
               // Final is a FULL SKILL
               else if (type == 2) {
@@ -38465,8 +38506,8 @@ function getRandomItem() {
 // —————————————————————————————————————————————————————————————————————————————————
 const SAE = { 
     defaults: { 
-        isEnabled: true,
-        turnsPerAICall: 25,
+        isEnabled: false,
+        turnsPerAICall: 50,
         arcPrompt: `\n[SYSTEM: Stop story. List 11 brief, chronological future events (under 7 words each). Focus on turning points/twists, adhering to specified tone/intensity.]\n`,
         arcTone: null,
         arcIntensity: null,
@@ -39211,7 +39252,7 @@ globalThis.onOutput_Combined = function(text) {
     const isInputFromOurSystem = /\[SYSTEM-MSG-START\][\s\S]*?\[SYSTEM-MSG-END\]/.test((text || "").trim());
     const isACGActive = state.AutoCards?.generation?.workpiece && Object.keys(state.AutoCards.generation.workpiece).length > 0;
     const isSAEExpectingAIOutputAsArc = state.sae?.isEnabled && state.sae.saveOutput;
-    const currentTurnForOutputLog = info?.actionCount ?? 'N/A';
+    const currentTurnForOutputLog = state?.turnCount ?? 'N/A';
 
     // Handle system messages
     if (isInputFromOurSystem && !isACGActive && !isSAEExpectingAIOutputAsArc) {
@@ -40281,8 +40322,8 @@ function createIfNoANSC(){
     const authNoteSC = storyCards.find(sc => sc.title === "New Auth Note");
      
 // Convert holder to string, clean commas, and finally store to sc entry
-  authNoteSC.entry = String(formatForSC).replace(/,/g, '');
-  authNoteSC.description = String(formatForSC).replace(/,/g, '');
+    authNoteSC.entry = "Writing Style Genre: Adventure, Open World. Reflect Personality in Actions and Speech. Avoid Mentioning Secrets";
+  authNoteSC.description = "this is the replacement for authors note. adjust it as you wish and after any action (do/say/story), it will be picked up by the AI";
   };
   }
   
