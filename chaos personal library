@@ -35535,7 +35535,7 @@ function executeTalent(plr, fullTalentFlag, index) {
     oldTalentLvl = state.players[plr].talents.lvl[index];
 
     // Using talents grants talent exp
-    talentExp = randomFloat(1, 5);
+    talentExp = randomFloat(0.1, 2);
     log("talentExp: " + talentExp);
 
     // Increase the talent's level by the generated experience
@@ -35613,7 +35613,7 @@ function executeskill(plr, fullSkillFlag, index) {
   oldSkillLvl = state.players[plr].skills.lvl[index];
 
   // Using skills grants skill exp
-  skillExp = randomFloat(1, 5);
+  skillExp = randomFloat(0.1, 2);
   log("skillExp: " + skillExp);
 
   // Increase the skill's level by the generated experience
@@ -35907,23 +35907,30 @@ function detectStorageCallActions(text) {
             }); //end of for thing
           } //end of for playerstorage
 
-          // If any talent keys are matched, push respective talent thing
-          state.players[plr].talents.keys.forEach((keys, index) => {
-            if (keys.includes(actionTextInput[i])) {
-              plrThings.types.push(1);
-              plrThings.indices.push(index);
-              plrThings.fullMatchFlags.push(true);
+         // If any talent keys are matched, push respective talent thing
+        // Check talent keys
+        state.players[plr].talents.keys.forEach((keyString, index) => {
+        if (keyString) {
+            const individualKeys = keyString.split(',').map(k => k.trim());
+            if (individualKeys.includes(actionTextInput[i])) {
+            plrThings.types.push(1);
+            plrThings.indices.push(index);
+            plrThings.fullMatchFlags.push(true);
             }
-          });
-
+        }
+        });
           // If any skill keys are matched, push respective skill thing
-          state.players[plr].skills.keys.forEach((keys, index) => {
-            if (keys.includes(actionTextInput[i])) {
-              plrThings.types.push(2);
-              plrThings.indices.push(index);
-              plrThings.fullMatchFlags.push(true);
+        // Check skill keys
+        state.players[plr].skills.keys.forEach((keyString, index) => {
+        if (keyString) {
+            const individualKeys = keyString.split(',').map(k => k.trim());
+            if (individualKeys.includes(actionTextInput[i])) {
+            plrThings.types.push(2);
+            plrThings.indices.push(index);
+            plrThings.fullMatchFlags.push(true);
             }
-          });
+        }
+        });
 
           // After looping through all things and storages for the current word, push array of matched things into calls. A call is an array of matched things found for a word.
           if (plrThings.types.length > 0) {
