@@ -29254,9 +29254,9 @@ function AutoCards(inHook, inText, inStop) {
         if (messagesToPost.length === 1) {
             newMessage += messagesToPost[0];
         } else {
-            newMessage += messagesToPost.map(
-                (messageLine, index) => "#" + (index + 1) + ": " + messageLine
-            ).join("\n");
+            newMessage += messagesToPost
+                .map(messageLine => messageLine) // removed numbering only
+                .join("\n");
         }
 
         // Minor variation if identical (optional)
@@ -30237,7 +30237,7 @@ const itemGainPhrases = [
   "It is now part of your belongings."
 ];
 
-giveWords = ["deliver", "fork", "gift", "give", "hand", "pay", "sell", "remove", "toss", "delivers", "gives", "pays", "sells", "removes", "tosses"
+giveWords = ["deliver", "fork", "gift", "give", "hand", "pay", "sell", "remove", "toss", "delivers", "gives", "pays", "sells", "removes", "tosses", 
 ];
 
 numWords = [
@@ -30371,7 +30371,9 @@ notEnoughPhrases = [
   "A flicker of [Thing] exerts itself, but your [Stat] can’t sustain it."
 ];
 
-attackWords = ["attack", "ambush", "bash", "batter", "bite", "bludgeon", "chop", "claw", "cleave", "club", "crack", "crush", "flail", "fling", "gouge", "hack", "impale", "jab", "kick", "lunge", "maul", "pound", "pummel", "pierce", "punch", "ram", "rend", "shred", "slash", "slam", "slice", "smash", "stab", "strike", "swipe", "swing", "smack", "thrust", "whack", "wreck"];
+attackWords = ["attack", "ambush", "bash", "batter", "bite", "bludgeon", "chop", "claw", "cleave", "club", "crack", "crush", "flail", "fling", "gouge", "hack", "impale", "jab", "kick", "lunge", "maul", "pound", "pummel", "pierce", "punch", "ram", "rend", "shred", "slash", "slam", "slice", "smash", "stab", "strike", "swipe", "swing", "smack", "thrust", "whack", "wreck", "attacks", "ambushes", "bashes", "batters", "bites", "bludgeons", "chops", "claws", "cleaves", "clubs",
+"cracks", "crushes", "flails", "flings", "gouges", "hacks", "impales", "jabs", "kicks", "lunges", "mauls", "pounds", "pummels", "pierces", "punches", "rams", "rends", "shreds", "slashes", "slams", "slices", "smashes", "stabs", "strikes", "swipes", "swings", "smacks", "thrusts", "whacks", "wrecks"
+];
 
 const attackTier1 = [
   "A hesitant impact leaves a soft but clear mark.",
@@ -30943,14 +30945,17 @@ dodgeWords = [
   // Running
   "run", "running", "sprint", "sprinting", "dash", "dashing", "jog", "jogging",
   "rush", "rushing", "flee", "fleeing",
-  "hurry", "hurrying", "escape", "escaping", "scurry", "scurrying",
+  "hurry", "hurrying", "escape", "escaping", "scurry", "scurrying",  "runs", "running", "sprints", "sprinting", "dashes", "dashing", "jogs", "jogging",
+  "rushes", "rushing", "flees", "fleeing",
+  "hurries", "hurrying", "escapes", "escaping", "scurries", "scurrying",
 
   // Dodging
   "dodge", "dodging", "sidestep", "sidestepping", "evade", "evading", "ducking", "swerve", "swerving", "weave", "weaving",
-  "avoid", "avoiding", "jump", "jumping", "leap", "leaping", "skid", "skidding",
+  "avoid", "avoiding", "jump", "jumping", "leap", "leaping", "skid", "skidding",  "dodges", "dodging", "sidesteps", "sidestepping", "evades", "evading", "ducking", "swerves", "swerving", "weaves", "weaving",
+  "avoids", "avoiding", "jumps", "jumping", "leaps", "leaping", "skids", "skidding",
 
   // Retreating
-  "retreat", "retreating", "withdraw", "withdrawing", "fall back", "falling back", "back away", "backing away",
+  "retreat", "retreating", "withdraw", "withdrawing", "fall back", "falling back", "back away", "backing away", "retreats", "retreating", "withdraws", "withdrawing", "falls back", "falling back", "backs away", "backing away",
 ];
 
 luckyPhrases = [
@@ -31053,7 +31058,9 @@ fullExhaustionArray = [
   "you hear your own heartbeat pounding in your skull, heavy and strained."
 ];
 
-enterWords = ["crawl", "drift", "enter", "fall", "get", "go", "head", "lay", "lie down", "make", "move", "nap", "prepare", "proceed", "slip", "sleep", "settle", "sink", "snuggle", "step", "surrender", "take", "turn in", "transition"];
+enterWords = ["crawl", "drift", "enter", "fall", "get", "go", "head", "lay", "lie down", "make", "move", "nap", "prepare", "proceed", "slip", "sleep", "settle", "sink", "snuggle", "step", "surrender", "take", "turn in", "transition", "crawls", "drifts", "enters", "falls", "gets", "goes", "heads", "lays", "lies down", "makes", "moves", "naps", "prepares", "proceeds", "slips", "sleeps", "settles", "sinks", "snuggles", "steps", "surrenders", "takes", "turns in", "transitions",
+
+];
 
 restingWords = ["catnap", "doze", "hibernate", "nap", "relax", "rest", "sleep", "slumber", "asleep"];
 
@@ -31667,8 +31674,8 @@ const talentPower10 = [
 ];
 
 const scoutWords = [
-  "analyze", "assess", "calculate", "decipher", "examine", "inspect", "investigate", "listen",
-  "look around", "looks around", "observe", "scan", "scope out", "scout", "survey", "track", "take in"
+  "analyze", "assess", "calculate", "decipher", "examine", "inspect", "investigate", "listen", "look around", "looks around", "observe", "scan", "scope out", "scout", "survey", "track", "take in", "analyzes", "assesses", "calculates", "deciphers", "examines", "inspects", "investigates", "listens", "looks around", "looks around", "observes", "scans", "scopes out", "scouts", "surveys", "tracks", "takes in"
+
 ];
 
 const detail1 = [
@@ -31922,9 +31929,12 @@ const defendTiers = {
   ]
 };
 
-const defendWords = ["brace", "braced stance", "brace up", "block", "defend", "defensive posture", "fortify", "guard up", "harden", "hold firm", "hold ground", "parry", "protect", "raise shield", "ready guard", "resist", "shield", "stand firm", "steady stance", "turtle up"];
+const defendWords = ["brace", "braced stance", "brace up", "block", "defend", "defensive posture", "fortify", "guard up", "harden", "hold firm", "hold ground", "parry", "protect", "raise shield", "ready guard", "resist", "shield", "stand firm", "steady stance", "turtle up", "braces", "braces up", "blocks", "defends", "defensive posture", "fortifies", "guards up", "hardens", "holds firm", "holds ground", "parries", "protects", "raises his shield", "readies his guard", "resists", "shields", "stands firm", "steadies his stance", "turtles up"
 
-const exerciseWords = ["curls", "bicep curls", "bicycle crunches", "bench press", "burpees", "butt kicks", "calf raises", "chin ups", "crunches", "deadlifts", "dumbbell flys", "glute bridges", "hammer curls", "high knees", "jump squats", "jumping jacks", "kettlebell swings", "leg raises", "lunges", "mountain climbers", "planks", "pull ups", "pullup", "pullups", "pull up", "push ups", "pushups", "push up", "pushup", "shoulder press", "side planks", "sit ups", "skaters", "squats", "step-ups", "tricep dips", "wall sits"];
+];
+
+const exerciseWords = ["curls", "bicep curls", "bicycle crunches", "bench press", "burpees", "butt kicks", "calf raises", "chin ups", "crunches", "deadlifts", "dumbbell flys", "glute bridges", "hammer curls", "high knees", "jump squats", "jumping jacks", "kettlebell swings", "leg raises", "lunges", "mountain climbers", "planks", "pull ups", "pullup", "pullups", "pull up", "push ups", "pushups", "push up", "pushup", "shoulder press", "side planks", "sit ups", "skaters", "squats", "step-ups", "tricep dips", "wall sits", "laps", "lap", "spar", "spars"
+];
 
 doWords = ["do", "does"];
 
@@ -33713,7 +33723,7 @@ function storeCurrToSC() {
   // Format the heat, temperature, and author’s note info
   currSC.entry =
     `World Clock: ${state.statusBar || ""}\n` + 
-    `Current turn: ${state.turnNum_SAE}\n` +
+    `Current turn: ${state.turnCount}\n` +
     `Year: ${state.globalTime.year}\n` +
     `Month-Day: ${String(state.globalTime.month).padStart(2, '0')}-${String(state.globalTime.day).padStart(2, '0')}\n` +
     `Hour-Minute: ${String(state.globalTime.hour).padStart(2, '0')}:${String(state.globalTime.minute).padStart(2, '0')}\n` +
@@ -39667,11 +39677,6 @@ if (!state.globalTime) {
 if (!state.turnsPerElemRemoval){state.turnsPerElemRemoval = 50;}
 if (!state.newNote){state.newNote = "";}
 
-if (!state.turnNum_SAE) {
-    state.turnNum_SAE = state.turnCount + 1; // first time initialization
-} else {
-    state.turnNum_SAE = state.turnCount + 1; // sync with current global turn
-}
 
 if (!state.worldClock) {
   // Customize starting year/month/day/hour/minute
@@ -40231,7 +40236,7 @@ function itemRemoval() {
     //mark and log item removal
       const removedItem = listLines[0];
     // Prepend removed item to description
-arcSC.description = `Log ${state.turnNum_SAE} | Previously:\n${removedItem}\n` + (arcSC.description || "");
+arcSC.description = `Log ${state.turnCount} | Previously:\n${removedItem}\n` + (arcSC.description || "");
 
 // Trim description to max 3000 characters
 if (arcSC.description.length > 3000) {
@@ -40267,8 +40272,8 @@ function arcElementRemoval() {
 
     // Trigger condition for element removal
     if (
-        state.turnNum_SAE >= 5 &&
-        state.turnNum_SAE % state.turnsPerElemRemoval === 0 &&
+        state.turnCount >= 5 &&
+        state.turnCount % state.turnsPerElemRemoval === 0 &&
         state.turnsPerElemRemoval !== 0
     ) {
         itemRemoval();                  // remove first item
@@ -40305,7 +40310,7 @@ function storePromptToSC() {
   // Also save into msgHolder if you still want that buffer
 
 state.message = 
-  `Turn: ${state.turnNum_SAE},Time: ${String(state.globalTime.hour).padStart(2,'0')}:${String(state.globalTime.minute).padStart(2,'0')}\n` +
+  `Turn: ${state.turnCount},Time: ${String(state.globalTime.hour).padStart(2,'0')}:${String(state.globalTime.minute).padStart(2,'0')}\n` +
   state.message;
 
 
