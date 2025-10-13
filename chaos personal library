@@ -33736,7 +33736,9 @@ function storeCurrToSC() {
     `TS: ${state.stt.timePassOnSay}\n`+
     `TST: ${state.stt.timePassOnStory}\n`+
     `TC: ${state.stt.timePassOnContinue} \n`+
-    `turn: ${state.turnCount}\n`;
+    `turn: ${state.turnCount}\n`+
+    `input: ${state.inputCount}\n`+
+    `output: ${state.outputCount}\n`;
    
 
 
@@ -33812,6 +33814,12 @@ function retrieveCurrFromSC() {
     }
     else if (key === "turn") {
       state.turnCount = Number(value);
+    }
+    else if (key === "input") {
+      state.inputCount = Number(value);
+    }
+    else if (key === "output") {
+      state.outputCount = Number(value);
     }
 
   });
