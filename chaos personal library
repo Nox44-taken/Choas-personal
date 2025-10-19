@@ -31068,7 +31068,7 @@ lightRestWords = ["brief", "fleeting", "minor", "momentary", "passing", "quick",
 
 moderateRestWords = ["catnap", "doze", "light sleep", "nap", "power nap", "repose", "rest", "siesta", "snooze"];
 
-fullRestWords = ["deep", "deeply", "hibernation", "hibernate", "long", "prolonged", "rejuvenating", "sleep", "slumber", "sound", "uninterrupted"];
+fullRestWords = ["deep sleep", "deeply", "hibernation", "hibernate", "long", "prolonged", "rejuvenating", "sleep", "slumber", "sound", "uninterrupted"];
 
 bodyParts = [
   // Standard humanoid body parts
@@ -40342,7 +40342,7 @@ function createIfNoANSC(){
     const authNoteSC = storyCards.find(sc => sc.title === "New Auth Note");
      
 // Convert holder to string, clean commas, and finally store to sc entry
-    authNoteSC.entry = "Writing Style Genre: Adventure, Open World. Reflect Personality in Actions and Speech. Avoid Mentioning Secrets";
+    authNoteSC.entry = "Writing Style Genre: Adventure, Open World. Reflect Personality in Actions and Speech. Avoid Mentioning Secrets\nuse these coin values for estimating monetary value: 1 copper = 1$, 1 bronze = 100$, 1 silver = 1000$, 1 gold = 10000$, 1 platin = 100000$";
   authNoteSC.description = "this is the replacement for authors note. adjust it as you wish and after any action (do/say/story), it will be picked up by the AI";
   };
   }
@@ -40351,7 +40351,7 @@ function retrieveANFromSC() {
   const authNoteSC = storyCards.find(sc => sc.title === "New Auth Note");
   if (!authNoteSC || !authNoteSC.entry) return "";
 
-  return authNoteSC.entry; // return the entry directly
+   return authNoteSC.entry.replace(/\n+/g, " "); // return the entry directly
 }
 
 // then wherever you want to update state.newNote:
