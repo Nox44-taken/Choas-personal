@@ -33738,7 +33738,9 @@ function storeCurrToSC() {
     `TC: ${state.stt.timePassOnContinue} \n`+
     `turn: ${state.turnCount}\n`+
     `input: ${state.inputCount}\n`+
-    `output: ${state.outputCount}\n`;
+    `output: ${state.outputCount}\n`+
+    `time script: ${state.timeScript}\n`+
+    `heat script: ${state.heatScript}\n`;
    
 
 
@@ -33821,7 +33823,12 @@ function retrieveCurrFromSC() {
     else if (key === "output") {
       state.outputCount = Number(value);
     }
-
+    else if (key === "time script") {
+  state.timeScript = (value.trim().toLowerCase() === "true");
+    }
+    else if (key === "heat script") {
+  state.heatScript = (value.trim().toLowerCase() === "true");
+    }
   });
   // --- Apply JSON/date recalculation logic exactly as given ---
   let needsDateRecalc = false;
@@ -38372,7 +38379,7 @@ function getRandomItem() {
             precise_delete: [ "looming ominously" ],
             replace: [ ["verdant", "green"], ["curtly", "shortly"], ["leverage", "use"], ["robust", "strong"], ["unprecedented", "new"], ["myriad", "many"], ["commence", "start"], ["ascertain", "find out"], ["endeavor", "try"], ["utilize", "use"], ["facilitate", "help"], ["plethora", "a lot"], ["elucidate", "explain"], ["exemplify", "show"], ["paradigm", "model"], ["synergy", "teamwork"], ["traverse", "cross"], ["illuminate", "explain"], ["manifest", "show"], ["intricate", "complex"], ["subsequent", "next"], ["procure", "get"], ["amidst", "among"], ["visage", "face"], ["peruse", "read"], ["cascade", "flow"], ["linger", "stay"], ["fervor", "excitement"], ["tranquil", "calm"], ["emanate", "come from"], ["beckon", "call"], ["venture", "go"], ["gaze", "look"], ["inquire", "ask"], ["exclaim", "shout"], ["murmur", "whisper"] ],
             name_replace: [ ["Li1ly", "Lorelei"], ["Lisf42a", "Larisa"], ["Sa1lawt", "Solène"], ["J32ake", "Jasper"], ["A14lx", "Abel"] ],
-            randomReplacementGroups: [ { phrase: "Elara", options: [ "Areal", "Leara", "Alrea", "Reala", "Vaila", "Ealra", "Alear", "Alare", "Aaerl", "Alare", ] }, { phrase: "Sarah", options: [ "Amelia", "Evelyn", "Ashley", "Violet", "Elsie", "Lucy", "Jane", "Rebecca", "Madison", "Rachel", "Vanessa", "Mia", "Elsie", "Chloe", "Alice", "Emily", "Emma" ] }, { phrase: "Mr. Thompson", options: [ "Mr. Aldridge", "Mr. Barrington", "Mr. Kessler", "Mr. Coldwell", "Mr. Davenport", "Mr. Ellsworth", "Mr. Fairchild", "Mr. Hargrove", "Mr. Quillson", "Mr. Ainsworth", "Mr. Kensington", "Mr. Lancaster", "Mr. Montague", "Mr. Norwood", "Mr. Pennington", "Mr. Radcliffe", "Mr. Somerville", "Mr. Wentworth" ] }, { phrase: "Mrs. Thompson", options: [ "Mrs. Ashbourne", "Mrs. Blythe", "Mrs. Carrington", "Mrs. Dovewell", "Mrs. Everhart", "Mrs. Fenwick", "Mrs. Islington", "Mrs. Lockridge", "Mrs. Jasmere", "Mrs. Sterling", "Mrs. Claremont", "Mrs. Iverson", "Mrs. Quillan", "Mrs. Rosendale", "Mrs. Valmere" ] }, { phrase: "Ms. Thompson", options: [ "Ms. Durnell", "Ms. Blythe", "Ms. Everston", "Ms. Dovewell", "Ms. Everhart", "Ms. Fenwick", "Ms. Morrow", "Ms. Lockridge", "Ms. Jasmere", "Ms. Sterling", "Ms. Claremont", "Ms. Nightford", "Ms. Quillan", "Ms. Rosendale", "Ms. Valmere" ] } ],
+            randomReplacementGroups: [ { phrase: "Elara", options: [ "Areal", "Leara", "Alrea", "Reala", "Vaila", "Ealra", "Alear", "Alare", "Aaerl", "Alare", ] }, { phrase: "Sarah", options: [ "Amelia", "Evelyn", "Ashley", "Violet", "Elsie", "Lucy", "Jane", "Rebecca", "Madison", "Rachel", "Vanessa", "Mia", "Elsie", "Chloe", "Alice", "Emily", "Emma" ] }, { phrase: "Mr. Thompson", options: [ "Mr. Aldridge", "Mr. Barrington", "Mr. Kessler", "Mr. Coldwell", "Mr. Davenport", "Mr. Ellsworth", "Mr. Fairchild", "Mr. Hargrove", "Mr. Quillson", "Mr. Ainsworth", "Mr. Kensington", "Mr. Lancaster", "Mr. Montague", "Mr. Norwood", "Mr. Pennington", "Mr. Radcliffe", "Mr. Somerville", "Mr. Wentworth" ] }, { phrase: "Mrs. Thompson", options: [ "Mrs. Ashbourne", "Mrs. Blythe", "Mrs. Carrington", "Mrs. Dovewell", "Mrs. Everhart", "Mrs. Fenwick", "Mrs. Islington", "Mrs. Lockridge", "Mrs. Jasmere", "Mrs. Sterling", "Mrs. Claremont", "Mrs. Iverson", "Mrs. Quillan", "Mrs. Rosendale", "Mrs. Valmere" ] }, { phrase: "Ms. Thompson", options: [ "Ms. Durnell", "Ms. Blythe", "Ms. Everston", "Ms. Dovewell", "Ms. Everhart", "Ms. Fenwick", "Ms. Morrow", "Ms. Lockridge", "Ms. Jasmere", "Ms. Sterling", "Ms. Claremont", "Ms. Nightford", "Ms. Quillan", "Ms. Rosendale", "Ms. Valmere" ] }, { phrase: "Lyra", options: [ "Lena", "Lyanna", "Lina", "Lyssa", "Lyora", "Lyandra", "Lyriel", "Lyana", "Lyanna", "Lirael" ] } ],
             initialized: true
         },
         initialize: function(acAPI) {this.acAPI = acAPI; if (!state.formatter || !state.formatter.initialized) {state.formatter = JSON.parse(JSON.stringify(this.defaults));} else {for(const key in this.defaults){if(state.formatter[key]===undefined){state.formatter[key]=JSON.parse(JSON.stringify(this.defaults[key]));}} state.formatter.initialized = true;}},
@@ -39691,7 +39698,8 @@ if (!state.globalTime) {
 }
 if (!state.turnsPerElemRemoval){state.turnsPerElemRemoval = 50;}
 if (!state.newNote){state.newNote = "";}
-
+if (!state.timeScript){state.timeScript = true};
+if (!state.heatScript){state.heatScript = true};
 
 if (!state.worldClock) {
   // Customize starting year/month/day/hour/minute
