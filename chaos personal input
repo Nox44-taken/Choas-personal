@@ -95,6 +95,7 @@ const result = onInput_Combined(text);
 
  retrieveWCFromSC();
  ///run world clock input modifier
+ if (state.timeScript) {
  function getClockString() {
     const c = state.worldClock;
     return `Year ${c.year}, ${String(c.month).padStart(2, "0")}-${String(c.day).padStart(2, "0")} ${String(c.hour).padStart(2, "0")}:${String(c.minute).padStart(2, "0")}`;
@@ -177,7 +178,7 @@ const result = onInput_Combined(text);
       state.lastActionMinutes = mins;
     }
   }
-
+ }
    if (text.toLowerCase().includes("@req")) {
     let requestText = text.replace(/^[\s\S]*@req(?:uest)?\s*/i, "").trim();
 
@@ -192,7 +193,7 @@ const result = onInput_Combined(text);
     state.memory.frontMemory = systemPrompt;
     state.message = `Request acknowledged.`;
   }
-
+if (state.heatScript) {
 if (state.heat == undefined){
     state.heat = state.initialHeatValue
     state.cooldownMode = false
@@ -239,6 +240,11 @@ if (state.heat == undefined){
       }
     }
   }
+    // Cap heat and adjust temperature
+  state.heat = Math.min(Math.max(state.heat, -100), 100)
+  if (state.heat <= -100) { state.storyTemperature -= 1; state.heat = 0; log("Heat hit min") }
+  if (state.heat >= 100) { state.storyTemperature += 1; state.heat = 0; log("Heat hit max") }
+
 
   state.chance = randomint(1, 100)
   if (state.chance <= state.randomExplosionChance){
@@ -434,7 +440,10 @@ if (state.heat == undefined){
     }
   }
   state.authorsNoteStorage = state.memory.authorsNote
-
+} else {
+  state.memory.authorsNote = state.originalAuthorsNote;
+ state.authorsNoteStorage = state.memory.authorsNote
+}
 // store as worldclock script then retreive as global clock and make changes for output
 storeWCToSC();
 
@@ -466,7 +475,7 @@ function input(text, variables) {
     const systemPrompt = `
 <SYSTEM>
 # Narrative shaping:
-Weave the following concept into the next output in a subtle, immersive way:
+Weave the following concept into the next output in a subtle, immersive way, while staying true to recent related events if any exist:
 ${requestText}
 </SYSTEM>
     `;
