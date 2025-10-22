@@ -33730,8 +33730,7 @@ function storeCurrToSC() {
     `Turns Per Removal: ${state.turnsPerElemRemoval}\n` +
     `Current Heat: ${state.heat}\n` +
     `Current Temperature: ${state.storyTemperature}\n` +
-    `AI: ${state.sae.activePointIndex}\n`+
-    `Authors Note: ${state.authorsNoteStorage}\n`+ 
+    `AI: ${state.sae.activePointIndex}\n`+   
     `TD: ${state.stt.timePassOnDo}\n`+
     `TS: ${state.stt.timePassOnSay}\n`+
     `TST: ${state.stt.timePassOnStory}\n`+
@@ -33740,7 +33739,8 @@ function storeCurrToSC() {
     `input: ${state.inputCount}\n`+
     `output: ${state.outputCount}\n`+
     `time script: ${state.timeScript}\n`+
-    `heat script: ${state.heatScript}\n`;
+    `heat script: ${state.heatScript}\n`+
+    `Authors Note: ${state.authorsNoteStorage}\n`;
    
 
 
@@ -40350,7 +40350,7 @@ function createIfNoANSC(){
     const authNoteSC = storyCards.find(sc => sc.title === "New Auth Note");
      
 // Convert holder to string, clean commas, and finally store to sc entry
-    authNoteSC.entry = "Writing Style Genre: Adventure, Open World. Reflect Personality in Actions and Speech. Avoid Mentioning Secrets\nuse these coin values for estimating monetary value: 1 copper = 1$, 1 bronze = 100$, 1 silver = 1000$, 1 gold = 10000$, 1 platin = 100000$";
+    authNoteSC.entry = "Writing Style Genre: Adventure, Open World, multiple races. \nStrictly follow these rules:\nReflect Personality in Actions and Speech. Avoid Mentioning Secrets.\ncreate realistic monetary value based on real world approximations using these coin values: 1 copper = 1$, 1 bronze = 100$, 1 silver = 1000$, 1 gold = 10000$, 1 platin = 100000$. for reference, bread costs 1 coppper coins so scale accordingly"
   authNoteSC.description = "this is the replacement for authors note. adjust it as you wish and after any action (do/say/story), it will be picked up by the AI";
   };
   }
