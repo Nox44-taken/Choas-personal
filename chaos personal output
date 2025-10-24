@@ -267,7 +267,7 @@ if (state.heatScript) {
   : '');
 state.heatlogs = heatlogs;
 } else {
-  state.memory.authorsNote = state.originalAuthorsNote;
+  state.memory.authorsNote = state.newNote;
  state.authorsNoteStorage = state.memory.authorsNote
 }
  // store as worldclock script then retreive as global clock and make changes for output
