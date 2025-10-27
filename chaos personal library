@@ -55,7 +55,7 @@ globalThis.MainSettings = (class MainSettings {
         // (true or false)
         ,
         // Minimum number of turns in between automatic card generation events?
-        DEFAULT_CARD_CREATION_COOLDOWN: 9999
+        DEFAULT_CARD_CREATION_COOLDOWN: 25
         // (0 to 9999)
         ,
         // Use a bulleted list format for newly generated card entries?
@@ -23934,7 +23934,7 @@ function AutoCards(inHook, inText, inStop) {
     // (true or false)
     ,
     // Minimum number of turns in between automatic card generation events?
-    DEFAULT_CARD_CREATION_COOLDOWN: 9999
+    DEFAULT_CARD_CREATION_COOLDOWN: 25
     // (0 to 9999)
     ,
     // Use a bulleted list format for newly generated card entries?
@@ -38579,20 +38579,28 @@ const SAE = {
         "intense": " High-stakes, constant pressure, difficult moral choices, potential for severe consequences/failure."
     },
 
-      initialize: function(acAPI) {
-    this.acAPI = acAPI;
-    let wasFreshSAEInit = false;
+    initialize: function(acAPI) {
+    this.acAPI = acAPI;
+    let wasFreshSAEInit = false;
 
-    if (!state.sae || !state.sae.initialized) {
-        state.sae = JSON.parse(JSON.stringify(this.defaults));
-        wasFreshSAEInit = true;
-    } else {
-        for (const key in this.defaults) {
-            if (state.sae[key] === undefined) {
-                state.sae[key] = JSON.parse(JSON.stringify(this.defaults[key]));
-            }
-        }
-    }
+    // --- START: ROBUST PERSISTENCE CHECK FIX ---
+    // Condition 1: If state.sae is completely missing (True start)
+    // This only happens on a brand new game or a true first-time load.
+    if (!state.sae) {
+        state.sae = JSON.parse(JSON.stringify(this.defaults)); // <-- FULL RESET (activePointIndex is 0)
+        wasFreshSAEInit = true;
+    } 
+    // Condition 2: If state.sae exists but is missing a critical key (e.g., from an old save format).
+    // This ensures we patch missing keys without resetting the activePointIndex.
+    else if (state.sae.arcPrompt === undefined) { 
+        for (const key in this.defaults) {
+            if (state.sae[key] === undefined) {
+                state.sae[key] = JSON.parse(JSON.stringify(this.defaults[key]));
+            }
+        }
+    }
+    // Note: All subsequent turns skip both blocks, preserving the current index.
+    // --- END: ROBUST PERSISTENCE CHECK FIX ---
 
     state.sae.initialized = true;
     state.sae.postReinitMessage = null;
@@ -38982,7 +38990,7 @@ checkForCompletion: function(currentAiOutputText) {
         return; 
     
     if (currentAiOutputText && typeof currentAiOutputText === 'string' && currentAiOutputText.trim()) { 
-        if (textSimilarityScore(activePointText, currentAiOutputText) > 0.45) { 
+        if (textSimilarityScore(activePointText, currentAiOutputText) > 0.99) { 
             if (!state.toastQueue) 
                 state.toastQueue = []; 
             state.toastQueue.push(`[SAE💡: Point "${activePointText}" seems complete.]`); 
@@ -39393,7 +39401,11 @@ globalThis.onOutput_Combined = function(text) {
         }
         state.toastQueue = [];
     }
-
+// Reset the completion flag here. This runs at the absolute end of the turn 
+// after the index has potentially advanced, ready for the next player input cycle.
+    if (state.sae?.completionSuggested) {
+        state.sae.completionSuggested = false;
+    }
     return { text: combinedOutput };
 };
 
@@ -39698,8 +39710,8 @@ if (!state.globalTime) {
 }
 if (!state.turnsPerElemRemoval){state.turnsPerElemRemoval = 50;}
 if (!state.newNote){state.newNote = "";}
-if (!state.timeScript){state.timeScript = true};
-if (!state.heatScript){state.heatScript = true};
+if (!state.timeScript){state.timeScript = false};
+if (!state.heatScript){state.heatScript = false};
 
 if (!state.worldClock) {
   // Customize starting year/month/day/hour/minute
@@ -40350,7 +40362,7 @@ function createIfNoANSC(){
     const authNoteSC = storyCards.find(sc => sc.title === "New Auth Note");
      
 // Convert holder to string, clean commas, and finally store to sc entry
-    authNoteSC.entry = "Writing Style Genre: Adventure, Open World, multiple races. \nStrictly follow these rules:\nReflect Personality in Actions and Speech. Avoid Mentioning Secrets.\ncreate realistic monetary value based on real world approximations using these coin values: 1 copper = 1$, 1 bronze = 100$, 1 silver = 1000$, 1 gold = 10000$, 1 platin = 100000$. for reference, bread costs 1 coppper coins so scale accordingly"
+    authNoteSC.entry = "{ Writing Style Genre: Adventure, Open World, multiple races }\n{ Rules: Reflect personality through action and dialogue. Player knows nothing of the world—treat all info as new and based only on what he sees, hears, or is told }\n{ No demi-human or animal folk has an animal head or animal traits (fur and scales) on their back, upper arm and thighs. These are only on the fore-arms, fore-legs }\n{ Use 2nd or 3rd person as intended. Always show that men are extremely rare and valuable }\n{ Economy: Base prices on real-world logic. Coin values—1 Copper = $1, Bronze = $100, Silver = $1000, Gold = $10000, Platin = $100000. [Bread = 1 Copper; scale costs accordingly] }"
   authNoteSC.description = "this is the replacement for authors note. adjust it as you wish and after any action (do/say/story), it will be picked up by the AI";
   };
   }
