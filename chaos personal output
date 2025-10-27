@@ -304,7 +304,7 @@ retrieveCurrFromSC();
 
  storeCurrToSC();
  log(`SAE Active Point Index 3: ${state.sae.activePointIndex}`);
-
+state.message =[ ];
  // Return everything in separate lines
 let finalText = [tmday, outText].filter(Boolean).join("\n");
 return { text: finalText };
