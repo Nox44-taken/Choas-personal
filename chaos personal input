@@ -193,7 +193,7 @@ const result = onInput_Combined(text);
     state.memory.frontMemory = systemPrompt;
     state.message = `Request acknowledged.`;
   }
-if (state.heatScript) {
+
 if (state.heat == undefined){
     state.heat = state.initialHeatValue
     state.cooldownMode = false
@@ -202,6 +202,7 @@ if (state.heat == undefined){
   if (state.storyTemperature == undefined){
     state.storyTemperature = state.initialTemperatureValue
   }
+if (state.heatScript) {  
   const lowerText = text.toLowerCase()
   const words = lowerText.split(/\s+/)
   let conflictCount = 0
